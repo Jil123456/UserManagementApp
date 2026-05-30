@@ -1,0 +1,250 @@
+/* =========================================================
+   GLOBAL RESET
+========================================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #0f0a23;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   AUTH WRAPPER (FULL PAGE)
+========================================================= */
+.auth-wrapper {
+    display: flex;
+    width: 100vw;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e1b4b 0%, #6d28d9 50%, #ec4899 100%);
+}
+
+/* =========================================================
+   LEFT SIDE (BRANDING)
+========================================================= */
+.brand-side {
+    width: 50%;
+    padding: 60px 80px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+.brand-logo-mark {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #ffffff;
+    border-radius: 6px;
+    transform: rotate(45deg);
+}
+
+.brand-hero {
+    margin: auto 0;
+    max-width: 420px;
+}
+
+.brand-hero h1 {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.sparkle {
+    color: #f472b6;
+}
+
+.brand-hero p {
+    margin: 20px 0;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.6;
+}
+
+.trust-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    font-size: 13px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f472b6;
+    box-shadow: 0 0 10px #f472b6;
+}
+
+/* =========================================================
+   RIGHT SIDE (FORM)
+========================================================= */
+.form-side {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* =========================================================
+   LOGIN CARD
+========================================================= */
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+}
+
+.auth-card h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #0f172a;
+}
+
+.subtitle {
+    font-size: 13.5px;
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+/* =========================================================
+   INPUTS
+========================================================= */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.input-wrap {
+    position: relative;
+}
+
+.ico {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    background: #ffffff;
+    transition: all 0.25s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 8px rgba(124,58,237,0.4);
+}
+
+/* =========================================================
+   FORGOT PASSWORD
+========================================================= */
+.forgot-row {
+    text-align: right;
+    margin-bottom: 18px;
+}
+
+.forgot-row a {
+    font-size: 12.5px;
+    color: #db2777;
+    font-weight: 600;
+}
+
+.forgot-row a:hover {
+    text-decoration: underline;
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+.btn-primary {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    background: linear-gradient(90deg, #ec4899, #7c3aed);
+    box-shadow: 0 6px 18px rgba(124,58,237,0.3);
+    transition: all 0.25s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(124,58,237,0.4);
+}
+
+/* =========================================================
+   ERROR BOX
+========================================================= */
+.error-msg-box {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 15px;
+}
+
+/* =========================================================
+   FOOTER LINK
+========================================================= */
+.auth-footer-link {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 13.5px;
+    color: #64748b;
+}
+
+.auth-footer-link a {
+    color: #7c3aed;
+    font-weight: 600;
+}
+
+.auth-footer-link a:hover {
+    text-decoration: underline;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 900px) {
+    .brand-side {
+        display: none;
+    }
+
+    .form-side {
+        width: 100%;
+    }
+}

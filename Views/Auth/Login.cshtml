@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="split-auth-container">
+    <div class="form-pane">
+        <h2 class="auth-brand-title" style="margin-bottom: 40px;">Sign in</h2>
+
+        <form method="post" action="/Auth/Login">
+            @Html.AntiForgeryToken()
+
+            <div class="input-group">
+                <input type="text" name="Username" required placeholder=" " />
+                <label>Username</label>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="Password" required placeholder=" " />
+                <label>Password</label>
+            </div>
+
+            <button type="submit" class="btn-gradient-submit" style="margin-top: 15px;">SIGN IN</button>
+        </form>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="error-msg-box">@ViewBag.Error</div>
+        }
+
+        <div class="switch-link" style="text-align: center; margin-top: 25px; font-size: 13.5px; color: #718096;">
+            Don't have an account? <a href="/Auth/Register" style="color: #4f46e5; font-weight: 600; text-decoration: none;">Create an account</a>
+        </div>
+    </div>
+
+    <div class="banner-pane" style="width: 50% !important; height: 100%; position: relative; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; text-align: center !important; padding: 0 40px !important; overflow: hidden;">
+
+        <div class="liquid-blob blob-1"></div>
+        <div class="liquid-blob blob-2"></div>
+        <div class="liquid-blob blob-3"></div>
+
+        <div style="position: relative; z-index: 5; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; width: 100%;">
+
+            <h2 style="font-size: 34px !important; font-weight: 800 !important; color: #ffffff !important; margin-bottom: 12px !important; text-align: center !important; letter-spacing: -0.5px !important; -webkit-text-fill-color: #ffffff !important; background: none !important; border: none !important;">
+                Welcome Back!
+            </h2>
+
+            <p style="font-size: 14px !important; color: rgba(255, 255, 255, 0.95) !important; line-height: 1.6 !important; margin-bottom: 35px !important; text-align: center !important; padding: 0 10px !important;">
+                Enter personal details to your employee account
+            </p>
+
+            <a href="/Auth/Register" style="padding: 12px 45px !important; border: 2px solid #ffffff !important; border-radius: 25px !important; background: #ffffff !important; color: #4f46e5 !important; font-weight: 700 !important; font-size: 13px !important; letter-spacing: 1px !important; text-decoration: none !important; display: inline-block !important; transition: all 0.2s ease-in-out !important; box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;">
+                SIGN UP
+            </a>
+
+        </div>
+    </div>
+</div>

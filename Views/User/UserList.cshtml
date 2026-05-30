@@ -1,0 +1,65 @@
+﻿@model IEnumerable<UserManagementApp.Models.User>
+@{
+    ViewData["Title"] = "User Registry Control";
+}
+
+<div class="glass-card custom-table-container">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="glass-alert">
+            ⚡ <b>Operations Success:</b> @TempData["Success"]
+        </div>
+    }
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+        <h4 class="text-gradient" style="font-size: 26px;">👥 Enterprise User Directory</h4>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 13.5px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+            Dashboard Base
+        </a>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="premium-table">
+            <thead>
+                <tr>
+                    <th>Assigned Identity</th>
+                    <th>Account Handle</th>
+                    <th>Email Point</th>
+                    <th>Mobile Network</th>
+                    <th>Security Clearance</th>
+                    <th style="text-align: right; padding-right: 25px;">Operations Management</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td style="font-weight: 600;">@user.Fullname</td>
+                        <td style="color: rgba(255,255,255,0.7);">@@@user.Username</td>
+                        <td>@user.Email</td>
+                        <td>@user.Mobile</td>
+                        <td>
+                            <span class="@(user.RoleId == 1 ? "badge-admin" : "badge-user")">
+                                @(user.RoleId == 1 ? "Admin" : "User")
+                            </span>
+                        </td>
+                        <td style="text-align: right; padding-right: 20px;">
+                            <a asp-controller="User" asp-action="Edit" asp-route-id="@user.UserId" class="btn-primary" style="width: auto; padding: 8px 16px; font-size: 12.5px; margin-right: 6px; background: linear-gradient(90deg, #3b82f6, #2563eb);">
+                                Edit
+                            </a>
+
+                            <form asp-action="Delete" asp-controller="User" method="post" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@user.UserId" />
+                                <button type="submit" class="btn-primary" style="width: auto; padding: 8px 16px; font-size: 12.5px; background: linear-gradient(90deg, #ef4444, #dc2626);" onclick="return confirm('Are you certain you want to wipe this database entity record permanently?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

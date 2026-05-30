@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="auth-container">
+    <div class="split-auth-container wide-card">
+
+        <div class="form-pane wide-form">
+            <h2 class="auth-brand-title">Create Account</h2>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="register-error-banner">
+                    <span>⚠️ <b>Validation Alert:</b> @ViewBag.Error</span>
+                </div>
+            }
+
+            <form method="post" action="/Auth/Register">
+                @Html.AntiForgeryToken()
+
+                <div class="register-grid">
+                    <div class="input-group">
+                        <input type="text" name="Fullname" required placeholder=" " />
+                        <label>Full Name</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="Username" required placeholder=" " />
+                        <label>Username</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="email" name="Email" required placeholder=" " />
+                        <label>Email Address</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="Mobile" required placeholder=" " />
+                        <label>Mobile Number</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" name="Password" required placeholder=" " />
+                        <label>Password</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" name="Confirmpassword" required placeholder=" " />
+                        <label>Confirm Password</label>
+                    </div>
+
+                    <div class="input-group date-group">
+                        <input type="date" name="Dob" required placeholder=" " />
+                        <label class="static-label">Date of Birth</label>
+                    </div>
+
+                    <div class="input-group select-group">
+                        <select name="Role" class="select-role">
+                            <option value="user">User Role</option>
+                            <option value="admin">Admin Access</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <button type="submit" class="btn-gradient-submit">REGISTER</button>
+                </div>
+            </form>
+
+            <div class="switch-link" style="text-align: center; margin-top: 15px; font-size: 13px; color: #718096;">
+                Already have an account? <a href="/Auth/Login" style="color: #4f46e5; font-weight: 600; text-decoration: none;">Login Workspace</a>
+            </div>
+        </div>
+
+        <div class="banner-pane" style="width: 42% !important; height: 100%; position: relative; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; text-align: center !important; padding: 0 40px !important; overflow: hidden;">
+
+            <div class="liquid-blob blob-1"></div>
+            <div class="liquid-blob blob-2"></div>
+            <div class="liquid-blob blob-3"></div>
+
+            <div style="position: relative; z-index: 5; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; width: 100%;">
+
+                <h2 style="font-size: 36px !important; font-weight: 800 !important; color: #ffffff !important; margin-bottom: 16px !important; text-align: center !important; letter-spacing: -0.5px !important; -webkit-text-fill-color: #ffffff !important; background: none !important;">
+                    Join Us!
+                </h2>
+
+                <p style="font-size: 14px !important; color: rgba(255, 255, 255, 0.95) !important; line-height: 1.6 !important; margin-bottom: 35px !important; text-align: center !important; padding: 0 10px !important;">
+                    Set up your profile credentials to access the system platform
+                </p>
+
+                <a href="/Auth/Login" style="padding: 12px 45px !important; border: 2px solid #ffffff !important; border-radius: 25px !important; background: #ffffff !important; color: #4f46e5 !important; font-weight: 700 !important; font-size: 13px !important; letter-spacing: 1px !important; text-decoration: none !important; display: inline-block !important; transition: all 0.2s ease-in-out !important; box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;">
+                    SIGN IN
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+</div>

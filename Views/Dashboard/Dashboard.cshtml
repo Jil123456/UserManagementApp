@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="glass-card" style="width: 100%; max-width: 850px; margin: 0 auto;">
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; margin-bottom: 4px; text-align: left;">Dashboard</h2>
+        <p style="color: #64748b; font-size: 14.5px; font-weight: 500;">
+            Welcome back, <span class="text-gradient">@Context.Session.GetString("Username")</span>
+        </p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="metric-box">
+            <p class="profile-label">Global Directory Records</p>
+            <h3>@ViewBag.TotalUsers</h3>
+        </div>
+
+        @if (Context.Session.GetInt32("RoleId") == 1)
+        {
+            <div class="metric-box">
+                <p class="profile-label">Privileged Administrators</p>
+                <h3>@ViewBag.TotalAdmins</h3>
+            </div>
+
+            <div class="metric-box">
+                <p class="profile-label">Standard Users Only</p>
+                <h3>@ViewBag.TotalUsersOnly</h3>
+            </div>
+        }
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 30px;">
+        <a asp-controller="Dashboard" asp-action="Profile" class="btn-primary" style="width: auto; padding: 12px 28px; background: #f1f5f9 !important; border: 1px solid #cbd5e1; color: #475569 !important; box-shadow: none !important; border-radius: 25px !important;">
+            👤 View Profile
+        </a>
+
+        @if (Context.Session.GetInt32("RoleId") == 1)
+        {
+            <a asp-controller="User" asp-action="UserList" class="btn-primary" style="width: auto; padding: 12px 28px; border-radius: 25px !important;">
+                👥 Manage Users Control
+            </a>
+        }
+    </div>
+</div>
