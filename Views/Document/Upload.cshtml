@@ -1,0 +1,150 @@
+@{
+    ViewData["Title"] = "Upload Documents";
+}
+
+<div class="edit-profile-wrapper animate-fade-in">
+    <div class="edit-card" style="max-width: 640px;">
+        <div class="edit-header">
+            <div class="edit-avatar-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                <i class="fas fa-cloud-arrow-up" style="font-size: 20px;"></i>
+            </div>
+            <h2>Upload Documents</h2>
+            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Aadhar Card and PAN Card are <strong style="color: #ef4444;">mandatory</strong></p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> @TempData["Error"]
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 20px;">
+                <i class="fas fa-check-circle" style="margin-right: 6px;"></i> @TempData["Success"]
+            </div>
+        }
+
+        <!-- File size info -->
+        <div style="background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15); padding: 12px 16px; border-radius: 10px; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-info-circle" style="color: #6366f1; font-size: 16px;"></i>
+            <span style="font-size: 13px; color: #64748b;">Max file size: <strong style="color: #1e293b;">2MB per file</strong> &nbsp;|&nbsp; Allowed: <strong style="color: #1e293b;">PDF only</strong></span>
+        </div>
+
+        <form action="/Document/Upload" method="post" enctype="multipart/form-data" class="edit-form">
+            @Html.AntiForgeryToken()
+
+            <!-- ✅ AADHAR CARD — MANDATORY -->
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fas fa-id-card" style="color: #6366f1;"></i>
+                    <strong style="color: #1e293b; font-size: 15px;">Aadhar Card</strong>
+                    <span style="background: #ef4444; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px;">MANDATORY</span>
+                </label>
+                
+                @{
+                    var aadhar = ViewBag.AadharDoc as UserManagementApp.Models.UserDocument;
+                    if (aadhar != null && aadhar.Status == "Approved")
+                    {
+                        <div style="padding: 14px 18px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="color: #065f46; font-weight: 600; font-size: 14px;"><i class="fas fa-lock" style="margin-right: 6px;"></i> Approved & Locked</span>
+                            <span style="font-size: 11px; font-weight: 700; background: #10b981; color: white; padding: 3px 10px; border-radius: 6px;">APPROVED 🔒</span>
+                        </div>
+                    }
+                    else if (aadhar != null && aadhar.Status == "Pending")
+                    {
+                        <div style="padding: 14px 18px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="color: #92400e; font-weight: 600; font-size: 14px;"><i class="fas fa-clock" style="margin-right: 6px;"></i> Under Review</span>
+                            <span style="font-size: 11px; font-weight: 700; background: #f59e0b; color: white; padding: 3px 10px; border-radius: 6px;">PENDING ⏳</span>
+                        </div>
+                    }
+                    else if (aadhar != null && aadhar.Status == "Rejected")
+                    {
+                        <div style="padding: 10px 14px; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; margin-bottom: 10px; font-size: 13px; color: #991b1b; font-weight: 600;">
+                            <i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i> Rejected — Please re-upload a valid document
+                        </div>
+                        <input type="file" name="AadharFile" required accept=".pdf" class="form-control"
+                               style="padding: 10px 16px; background: #f8fafc; border: 1.5px dashed #fca5a5; border-radius: 12px; cursor: pointer;" />
+                    }
+                    else
+                    {
+                        <input type="file" name="AadharFile" required accept=".pdf" class="form-control"
+                               style="padding: 10px 16px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; cursor: pointer;" />
+                    }
+                }
+            </div>
+
+            <!-- ✅ PAN CARD — MANDATORY -->
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fas fa-credit-card" style="color: #6366f1;"></i>
+                    <strong style="color: #1e293b; font-size: 15px;">PAN Card</strong>
+                    <span style="background: #ef4444; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.5px;">MANDATORY</span>
+                </label>
+
+                @{
+                    var pan = ViewBag.PanDoc as UserManagementApp.Models.UserDocument;
+                    if (pan != null && pan.Status == "Approved")
+                    {
+                        <div style="padding: 14px 18px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="color: #065f46; font-weight: 600; font-size: 14px;"><i class="fas fa-lock" style="margin-right: 6px;"></i> Approved & Locked</span>
+                            <span style="font-size: 11px; font-weight: 700; background: #10b981; color: white; padding: 3px 10px; border-radius: 6px;">APPROVED 🔒</span>
+                        </div>
+                    }
+                    else if (pan != null && pan.Status == "Pending")
+                    {
+                        <div style="padding: 14px 18px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="color: #92400e; font-weight: 600; font-size: 14px;"><i class="fas fa-clock" style="margin-right: 6px;"></i> Under Review</span>
+                            <span style="font-size: 11px; font-weight: 700; background: #f59e0b; color: white; padding: 3px 10px; border-radius: 6px;">PENDING ⏳</span>
+                        </div>
+                    }
+                    else if (pan != null && pan.Status == "Rejected")
+                    {
+                        <div style="padding: 10px 14px; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; margin-bottom: 10px; font-size: 13px; color: #991b1b; font-weight: 600;">
+                            <i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i> Rejected — Please re-upload a valid document
+                        </div>
+                        <input type="file" name="PanFile" required accept=".pdf" class="form-control"
+                               style="padding: 10px 16px; background: #f8fafc; border: 1.5px dashed #fca5a5; border-radius: 12px; cursor: pointer;" />
+                    }
+                    else
+                    {
+                        <input type="file" name="PanFile" required accept=".pdf" class="form-control"
+                               style="padding: 10px 16px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; cursor: pointer;" />
+                    }
+                }
+            </div>
+
+            <!-- Divider -->
+            <div style="border-top: 1px solid #e2e8f0; margin: 8px 0 24px 0; position: relative;">
+                <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 12px; font-size: 12px; color: #94a3b8; font-weight: 600;">OPTIONAL</span>
+            </div>
+
+            <!-- ⭐ OTHER DOCUMENT — OPTIONAL -->
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fas fa-file-lines" style="color: #10b981;"></i>
+                    <strong style="color: #1e293b; font-size: 15px;">Other Document</strong>
+                    <span style="background: #e2e8f0; color: #64748b; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 6px;">OPTIONAL</span>
+                </label>
+                <select name="OtherDocType" class="form-control" style="padding: 10px 16px; margin-bottom: 10px; border-radius: 12px;">
+                    <option value="Driving License">Driving License</option>
+                    <option value="Passport">Passport</option>
+                    <option value="Voter ID">Voter ID</option>
+                    <option value="Other">Other Document</option>
+                </select>
+                <input type="file" name="OtherFile" accept=".pdf" class="form-control"
+                       style="padding: 10px 16px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; cursor: pointer;" />
+            </div>
+
+            <div class="edit-actions" style="margin-top: 28px;">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-cloud-arrow-up"></i> Upload All Documents
+                </button>
+                <a href="/Document/MyDocs" class="btn-secondary">
+                    <i class="fas fa-xmark"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+

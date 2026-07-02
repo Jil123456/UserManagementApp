@@ -1,0 +1,162 @@
+@model UserManagementApp.Models.User
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="edit-profile-wrapper animate-fade-in">
+    <div class="edit-card">
+        <div class="edit-header">
+            <div class="edit-avatar-icon">
+                @(Model.Fullname?.Substring(0, 1).ToUpper())
+            </div>
+            <h2>Edit User Profile</h2>
+            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Update the user details below</p>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> @TempData["Error"]
+            </div>
+        }
+
+        <form action="/Admin/User/Edit/@Model.UserId" method="post" class="edit-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="UserId" value="@Model.UserId" />
+
+            <div class="form-group">
+                <label><i class="fas fa-user" style="margin-right: 6px; color: #6366f1;"></i> Full Name</label>
+                <input type="text" name="Fullname" value="@Model.Fullname" class="form-control" placeholder="Enter full name" required />
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-at" style="margin-right: 6px; color: #6366f1;"></i> Username</label>
+                <input type="text" name="Username" value="@Model.Username" class="form-control" placeholder="Enter username" required />
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-envelope" style="margin-right: 6px; color: #6366f1;"></i> Email</label>
+                <input type="email" name="Email" value="@Model.Email" class="form-control" placeholder="Enter email" required />
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-mobile-screen" style="margin-right: 6px; color: #6366f1;"></i> Mobile</label>
+                <input type="text" name="Mobile" value="@Model.Mobile" class="form-control" placeholder="Enter mobile" required />
+            </div>
+
+            <div class="edit-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-check"></i> Save Changes
+                </button>
+                <a href="/Admin/User" class="btn-secondary">
+                    <i class="fas fa-xmark"></i> Cancel
+                </a>
+            </div>
+        </form>
+
+        <hr style="margin: 40px 0 20px 0; border-color: #e2e8f0;"/>
+
+        <div class="user-timeline-wrapper">
+            <h3 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 20px;"><i class="fas fa-history me-2"></i> User History & Timeline</h3>
+            @if (ViewBag.AuditLogs != null)
+            {
+                var logs = (IEnumerable<UserManagementApp.Models.AuditLog>)ViewBag.AuditLogs;
+                if (!logs.Any())
+                {
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 10px; text-align: center; color: #64748b;">
+                        <i class="fas fa-inbox fa-2x mb-2 d-block"></i> No activity history available for this user.
+                    </div>
+                }
+                else
+                {
+                    <div style="position: relative; padding-left: 20px; border-left: 2px solid #e2e8f0;">
+                        @foreach (var log in logs)
+                        {
+                            var timeStr = log.Timestamp.ToString("hh:mm tt");
+                            var actionMsg = log.ActionType;
+                            var emoji = "🔹";
+
+                            if (!string.IsNullOrEmpty(log.Details))
+                            {
+                                try
+                                {
+                                    using (var doc = System.Text.Json.JsonDocument.Parse(log.Details))
+                                    {
+                                        var root = doc.RootElement;
+                                        
+                                        if (log.ActionType.Contains("UPLOADED"))
+                                        {
+                                            emoji = "📄";
+                                            var docType = root.TryGetProperty("documentType", out var dt) ? dt.GetString() : "Document";
+                                            actionMsg = $"Uploaded {docType}";
+                                            if (log.ActionType.Contains("REUPLOADED")) actionMsg = $"Re-uploaded {docType}";
+                                        }
+                                        else if (log.ActionType.Contains("APPROVED"))
+                                        {
+                                            emoji = "✅";
+                                            var verifiedBy = root.TryGetProperty("verifiedBy", out var vb) ? vb.GetString() : "Admin";
+                                            actionMsg = $"Approved by {verifiedBy}";
+                                        }
+                                        else if (log.ActionType.Contains("REJECTED"))
+                                        {
+                                            emoji = "❌";
+                                            var reason = root.TryGetProperty("reason", out var r) ? r.GetString() : "Unknown reason";
+                                            actionMsg = $"Rejected ({reason})";
+                                        }
+                                        else if (log.ActionType.Contains("LOGIN"))
+                                        {
+                                            emoji = "🔐";
+                                            actionMsg = "Logged In";
+                                        }
+                                        else if (log.ActionType.Contains("LOGOUT"))
+                                        {
+                                            emoji = "🚪";
+                                            actionMsg = "Logged Out";
+                                        }
+                                        else if (log.ActionType.Contains("PROFILE_UPDATED"))
+                                        {
+                                            emoji = "✏️";
+                                            actionMsg = "Profile Updated";
+                                        }
+                                        else if (log.ActionType.Contains("REACTIVAT"))
+                                        {
+                                            emoji = "🔓";
+                                            actionMsg = "Account Reactivated";
+                                        }
+                                        else if (log.ActionType.Contains("BLOCKED") || log.ActionType.Contains("DEACTIVAT") || log.ActionType.Contains("LOCKED"))
+                                        {
+                                            emoji = "🔒";
+                                            actionMsg = "Account Deactivated";
+                                        }
+                                        else if (log.ActionType.Contains("REGISTERED"))
+                                        {
+                                            emoji = "🆕";
+                                            var email = root.TryGetProperty("email", out var em) ? em.GetString() : "";
+                                            actionMsg = string.IsNullOrEmpty(email) ? "User Registered" : $"User Registered ({email})";
+                                        }
+                                        else if (log.ActionType == "USER_INITIALIZED")
+                                        {
+                                            emoji = "🆕";
+                                            actionMsg = "Account Initialized (existing user)";
+                                        }
+                                        else if (log.ActionType == "KYC_INITIALIZED")
+                                        {
+                                            emoji = "✅";
+                                            actionMsg = "KYC already approved (old data)";
+                                        }
+                                    }
+                                }
+                                catch { }
+                            }
+
+                            <div style="margin-bottom: 15px; font-family: monospace; font-size: 15px; color: #1e293b;">
+                                <span style="color: #64748b;">[@timeStr]</span> @emoji @actionMsg
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

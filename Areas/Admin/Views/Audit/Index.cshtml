@@ -1,0 +1,300 @@
+@model IEnumerable<UserManagementApp.Models.AuditLog>
+@inject UserManagementApp.Services.IUserService _userService
+@inject UserManagementApp.Services.IDocumentService _documentService
+
+@{
+    ViewData["Title"] = "Global Audit Logs";
+}
+
+<div class="advanced-dashboard-container animate-fade-in">
+    <div class="premium-table-card" style="margin-bottom: 24px; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); background: #ffffff;">
+        <h3 style="margin-bottom: 20px; color: #0f172a; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center;"><i class="fas fa-filter" style="margin-right: 10px; color: #4f46e5; font-size: 1.1rem;"></i> Filter Logs</h3>
+        <form method="get" asp-action="Index" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: end;">
+            
+            <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Entity</label>
+                <select name="entityType" style="width: 100%; padding: 0 14px; height: 44px; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; font-size: 14px; font-weight: 500; outline: none; transition: all 0.2s; box-sizing: border-box; cursor: pointer;">
+                    <option value="">-- All Entities --</option>
+                    @foreach (var entity in ViewBag.EntityTypes)
+                    {
+                        <option value="@entity" selected="@(ViewBag.SelectedEntity == entity ? "selected" : null)">@entity</option>
+                    }
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Action</label>
+                <select name="actionType" style="width: 100%; padding: 0 14px; height: 44px; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; font-size: 14px; font-weight: 500; outline: none; transition: all 0.2s; box-sizing: border-box; cursor: pointer;">
+                    <option value="">-- All Actions --</option>
+                    @foreach (var action in ViewBag.ActionTypes)
+                    {
+                        string actionDisplay = action;
+                        if (action.Contains("USER_REGISTERED")) actionDisplay = "Registered";
+                        else if (action == "USER_INITIALIZED") actionDisplay = "Account Initialized";
+                        else if (action == "KYC_INITIALIZED") actionDisplay = "KYC Snapshot";
+                        else if (action.Contains("USER_LOGIN")) actionDisplay = "Login";
+                        else if (action.Contains("USER_LOGOUT")) actionDisplay = "Logout";
+                        else if (action.Contains("DOCUMENT_UPLOADED")) actionDisplay = "Uploaded Document";
+                        else if (action.Contains("DOCUMENT_REJECTED")) actionDisplay = "Rejected Document";
+                        else if (action.Contains("DOCUMENT_REUPLOADED")) actionDisplay = "Re-uploaded Document";
+                        else if (action.Contains("DOCUMENT_APPROVED")) actionDisplay = "Approved KYC";
+                        else if (action.Contains("USER_DEACTIVATED")) actionDisplay = "Account Deactivated";
+                        else if (action.Contains("USER_REACTIVATED")) actionDisplay = "Account Reactivated";
+                        else if (action.Contains("PROFILE_UPDATED")) actionDisplay = "Profile Updated";
+                        else if (action.Contains("SYSTEM_ERROR")) actionDisplay = "System Error";
+                        else actionDisplay = action.Replace("ROLE_", "Role ").Replace("_", " ");
+                        
+                        <option value="@action" selected="@(ViewBag.SelectedAction == action ? "selected" : null)">@actionDisplay</option>
+                    }
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">User</label>
+                <input type="text" name="userFilter" value="@ViewBag.SelectedUser" placeholder="Search user..." style="width: 100%; padding: 0 14px; height: 44px; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; font-size: 14px; font-weight: 500; outline: none; transition: all 0.2s; box-sizing: border-box;" />
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Details</label>
+                <input type="text" name="detailsFilter" value="@ViewBag.SelectedDetails" placeholder="Search details..." style="width: 100%; padding: 0 14px; height: 44px; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; font-size: 14px; font-weight: 500; outline: none; transition: all 0.2s; box-sizing: border-box;" />
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">From</label>
+                <input type="date" name="startDate" value="@ViewBag.SelectedStartDate" style="width: 100%; padding: 0 14px; height: 44px; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; font-size: 14px; font-weight: 500; outline: none; transition: all 0.2s; box-sizing: border-box;" />
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">To</label>
+                <input type="date" name="endDate" value="@ViewBag.SelectedEndDate" style="width: 100%; padding: 0 14px; height: 44px; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc; color: #0f172a; font-size: 14px; font-weight: 500; outline: none; transition: all 0.2s; box-sizing: border-box;" />
+            </div>
+
+            <div>
+                <button type="submit" class="btn-primary" style="height: 44px; width: 100%; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="premium-table-card">
+        <div class="table-utility-bar">
+            <div class="identity-info">
+                <span class="profile-name" style="font-size: 16px;"><i class="fas fa-journal-whills" style="color: #6366f1; margin-right: 8px;"></i> System Audit Logs</span>
+                <span class="profile-status-indicator">Global historical record of all system events</span>
+            </div>
+            <div class="live-pulse-badge">
+                <span class="pulse-dot"></span> @ViewBag.TotalLogs Logs Found
+            </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+            <table class="enterprise-matrix">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Timestamp</th>
+                        <th style="width: 20%">Action</th>
+                        <th style="width: 15%">Performed By</th>
+                        <th style="width: 15%">On User</th>
+                        <th style="width: 35%">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 40px; color: #6b7280; font-size: 15px;">
+                                <i class="fas fa-inbox" style="font-size: 24px; color: #9ca3af; margin-bottom: 10px; display: block;"></i>
+                                No audit logs found matching criteria.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var log in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600; color: #1e293b; font-size: 13px;">@log.Timestamp.ToString("dd MMM yyyy HH:mm")</div>
+                                </td>
+                                <td>
+                                    @{
+                                        string actionDisplay = log.ActionType;
+                                        if (log.ActionType.Contains("USER_REGISTERED")) actionDisplay = "Registered";
+                                        else if (log.ActionType == "USER_INITIALIZED") actionDisplay = "Account Initialized";
+                                        else if (log.ActionType == "KYC_INITIALIZED") actionDisplay = "KYC Snapshot";
+                                        else if (log.ActionType.Contains("USER_LOGIN")) actionDisplay = "Login";
+                                        else if (log.ActionType.Contains("USER_LOGOUT")) actionDisplay = "Logout";
+                                        else if (log.ActionType.Contains("DOCUMENT_UPLOADED")) actionDisplay = "Uploaded Document";
+                                        else if (log.ActionType.Contains("DOCUMENT_REJECTED")) actionDisplay = "Rejected Document";
+                                        else if (log.ActionType.Contains("DOCUMENT_REUPLOADED")) actionDisplay = "Re-uploaded Document";
+                                        else if (log.ActionType.Contains("DOCUMENT_APPROVED")) actionDisplay = "Approved KYC";
+                                        else if (log.ActionType.Contains("USER_DEACTIVATED")) actionDisplay = "Account Deactivated";
+                                        else if (log.ActionType.Contains("USER_REACTIVATED")) actionDisplay = "Account Reactivated";
+                                        else if (log.ActionType.Contains("PROFILE_UPDATED")) actionDisplay = "Profile Updated";
+                                        else if (log.ActionType.Contains("SYSTEM_ERROR")) actionDisplay = "System Error";
+                                        else actionDisplay = log.ActionType.Replace("ROLE_", "Role ").Replace("_", " ");
+                                        
+                                        string actionColor = "#f8fafc";
+                                        string actionTextColor = "#475569";
+                                        string actionBorderColor = "#cbd5e1";
+                                        
+                                        if (log.ActionType.Contains("LOGIN") || log.ActionType.Contains("LOGOUT")) { actionColor = "#eff6ff"; actionTextColor = "#2563eb"; actionBorderColor = "#bfdbfe"; }
+                                        else if (log.ActionType.Contains("REGISTERED") || log.ActionType.Contains("INITIALIZED")) { actionColor = "#f5f3ff"; actionTextColor = "#7c3aed"; actionBorderColor = "#ddd6fe"; }
+                                        else if (log.ActionType.Contains("APPROVED") || log.ActionType.Contains("REACTIVATED") || log.ActionType.Contains("ASSIGNED")) { actionColor = "#f0fdf4"; actionTextColor = "#16a34a"; actionBorderColor = "#bbf7d0"; }
+                                        else if (log.ActionType.Contains("REJECTED") || log.ActionType.Contains("DEACTIVATED") || log.ActionType.Contains("LOCKED") || log.ActionType.Contains("ERROR")) { actionColor = "#fef2f2"; actionTextColor = "#dc2626"; actionBorderColor = "#fecaca"; }
+                                        else if (log.ActionType.Contains("UPLOADED") || log.ActionType.Contains("UPDATED") || log.ActionType.Contains("REMOVED")) { actionColor = "#fff7ed"; actionTextColor = "#ea580c"; actionBorderColor = "#fed7aa"; }
+                                    }
+                                    <span style="display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; background-color: @actionColor; color: @actionTextColor; border: 1px solid @actionBorderColor; letter-spacing: 0.3px;">@actionDisplay</span>
+                                </td>
+                                <td>
+                                    @{
+                                        string performedBy = log.PerformedBy ?? "System";
+                                        string pbInitial = performedBy.Substring(0, 1).ToUpper();
+                                        string pbBg = performedBy == "System" ? "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)" : "linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)";
+                                        string pbColor = performedBy == "System" ? "#475569" : "#4338ca";
+                                    }
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 28px; height: 28px; border-radius: 50%; background: @pbBg; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: @pbColor; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">@pbInitial</div>
+                                        <span style="font-weight: 600; color: #0f172a; font-size: 13px;">@performedBy</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @{
+                                        string onUser = "-";
+                                        var detailsDict = new Dictionary<string, object>();
+                                        try {
+                                            if (!string.IsNullOrEmpty(log.Details)) {
+                                                detailsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(log.Details) ?? new Dictionary<string, object>();
+                                            }
+                                        } catch { }
+
+                                        Func<string, string> getDVal = (key) => detailsDict.ContainsKey(key) ? detailsDict[key].ToString() ?? "" : "";
+
+                                        if (log.EntityId.HasValue)
+                                        {
+                                            if (log.EntityType == "User" || log.EntityType == "Auth")
+                                            {
+                                                var u = _userService.GetUserById(log.EntityId.Value);
+                                                if (u != null) onUser = u.Username;
+                                            }
+                                            else if (log.EntityType == "Document")
+                                            {
+                                                if (log.ActionType.Contains("UPLOADED"))
+                                                {
+                                                    // For uploads, EntityId is actually the UserId
+                                                    var u = _userService.GetUserById(log.EntityId.Value);
+                                                    if (u != null) onUser = u.Username;
+                                                }
+                                                else
+                                                {
+                                                    // For approvals/rejections, EntityId is the DocumentId
+                                                    var d = _documentService.GetDocumentById(log.EntityId.Value);
+                                                    if (d != null)
+                                                    {
+                                                        var u = _userService.GetUserById(d.UserId);
+                                                        if (u != null) onUser = u.Username;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        if (onUser == "-" && (log.ActionType.Contains("LOGIN") || log.ActionType.Contains("LOGOUT") || log.ActionType.Contains("REGISTERED")))
+                                        {
+                                            onUser = log.PerformedBy ?? "System";
+                                        }
+                                        
+                                        string ouInitial = onUser == "-" ? "?" : onUser.Substring(0, 1).ToUpper();
+                                    }
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        @if (onUser != "-")
+                                        {
+                                            <div style="width: 24px; height: 24px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #64748b; border: 1px solid #e2e8f0;">@ouInitial</div>
+                                        }
+                                        <span style="font-weight: 500; color: #475569; font-size: 13px;">@onUser</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.Details))
+                                    {
+                                        try
+                                        {
+                                            string message = "";
+                                            
+                                            if (log.ActionType.Contains("USER_LOGIN")) {
+                                                message = "Logged in successfully";
+                                            } else if (log.ActionType.Contains("USER_LOGOUT")) {
+                                                message = "Logged out successfully";
+                                            } else if (log.ActionType.Contains("USER_REGISTERED")) {
+                                                message = $"Account created with email {getDVal("email")}";
+                                            } else if (log.ActionType == "USER_INITIALIZED") {
+                                                message = "Account Initialized (existing user)";
+                                            } else if (log.ActionType == "KYC_INITIALIZED") {
+                                                message = "KYC already approved (old data)";
+                                            } else if (log.ActionType.Contains("DOCUMENT_UPLOADED")) {
+                                                message = $"Uploaded {getDVal("documentType")}";
+                                            } else if (log.ActionType.Contains("DOCUMENT_REUPLOADED")) {
+                                                message = $"{getDVal("documentType")} uploaded again";
+                                            } else if (log.ActionType.Contains("DOCUMENT_APPROVED")) {
+                                                message = "KYC approved successfully";
+                                            } else if (log.ActionType.Contains("DOCUMENT_REJECTED")) {
+                                                message = $"{getDVal("documentType")} rejected ({getDVal("reason")})";
+                                            } else if (log.ActionType.Contains("PROFILE_UPDATED")) {
+                                                message = "Profile was updated";
+                                            } else if (log.ActionType.Contains("USER_DEACTIVATED") || log.ActionType.Contains("BLOCKED") || log.ActionType.Contains("LOCKED")) {
+                                                message = "Account blocked";
+                                            } else if (log.ActionType.Contains("USER_REACTIVATED")) {
+                                                message = "Account reactivated";
+                                            } else if (log.ActionType.Contains("ROLE_CREATED")) {
+                                                message = $"Role created: {getDVal("RoleName")}";
+                                            } else if (log.ActionType.Contains("ROLE_UPDATED")) {
+                                                message = $"Role updated: {getDVal("RoleName")}";
+                                            } else if (log.ActionType.Contains("ROLE_DELETED")) {
+                                                message = $"Removed Role ID {getDVal("deletedRoleId")}";
+                                            } else {
+                                                message = string.Join(" | ", detailsDict.Select(kv => $"{kv.Key}: {kv.Value}"));
+                                            }
+
+                                            <div style="font-size: 13px; color: #334155;">
+                                                @Html.Raw(message)
+                                            </div>
+                                        }
+                                        catch
+                                        {
+                                            <div style="font-size: 12px; color: #475569; font-family: monospace; overflow-x: auto;">@log.Details</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #94a3b8; font-size: 12px; font-style: italic;">No additional details recorded.</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-top: 1px solid #f1f5f9; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                <div style="font-size: 13px; color: #64748b; font-weight: 500;">
+                    Showing page @ViewBag.CurrentPage of @ViewBag.TotalPages
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <a href="?page=@(ViewBag.CurrentPage - 1)&entityType=@ViewBag.SelectedEntity&actionType=@ViewBag.SelectedAction&userFilter=@ViewBag.SelectedUser&startDate=@ViewBag.SelectedStartDate&endDate=@ViewBag.SelectedEndDate" 
+                           style="padding: 8px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #475569; font-weight: 600; text-decoration: none; font-size: 13px;">Previous</a>
+                    }
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+                        <a href="?page=@(ViewBag.CurrentPage + 1)&entityType=@ViewBag.SelectedEntity&actionType=@ViewBag.SelectedAction&userFilter=@ViewBag.SelectedUser&startDate=@ViewBag.SelectedStartDate&endDate=@ViewBag.SelectedEndDate" 
+                           style="padding: 8px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; color: #475569; font-weight: 600; text-decoration: none; font-size: 13px;">Next</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

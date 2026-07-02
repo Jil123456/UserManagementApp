@@ -1,0 +1,77 @@
+@model IEnumerable<UserManagementApp.Models.UserDocument>
+
+@{
+    ViewData["Title"] = "Approved Documents History";
+}
+
+<div class="advanced-dashboard-container animate-fade-in">
+    <div class="premium-table-card">
+        <div class="table-utility-bar">
+            <div class="identity-info">
+                <span class="profile-name" style="font-size: 16px;"><i class="fas fa-file-circle-check" style="color: #10b981; margin-right: 8px;"></i> Approved Documents History</span>
+                <span class="profile-status-indicator">Log of all approved user documents</span>
+            </div>
+            <div class="live-pulse-badge" style="background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2);">
+                <span class="pulse-dot" style="background: #10b981; box-shadow: 0 0 8px #10b981;"></span> @Model.Count() Records
+            </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+            <table class="enterprise-matrix">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Document Type</th>
+                        <th>File</th>
+                        <th>Approved By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">@doc.Fullname</div>
+                                <div style="font-size: 12px; color: #94a3b8;">@@@doc.Username</div>
+                            </td>
+                            <td>
+                                <span style="padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(99,102,241,0.1); color: #6366f1;">@doc.DocumentType</span>
+                            </td>
+                            <td>
+                                <a href="@doc.FilePath" target="_blank" style="color: #6366f1; text-decoration: none; font-weight: 500;">
+                                    <i class="fas fa-file-pdf" style="margin-right: 4px; color: #ef4444;"></i> @doc.DisplayFileName
+                                </a>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Uploaded: @doc.UploadedDate.ToString("dd MMM yyyy")</div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(doc.ActionByAdmin))
+                                {
+                                    <span style="font-weight: 600; color: #475569;"><i class="fas fa-shield-halved" style="margin-right: 4px; color: #10b981;"></i>@doc.ActionByAdmin</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #94a3b8; font-style: italic;">Unknown</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-folder-open" style="font-size: 24px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+                                No approved documents found in history.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+        <a href="/Admin/Dashboard" class="btn-premium-back">
+            <i class="fas fa-arrow-left-long"></i> Back to Dashboard
+        </a>
+    </div>
+</div>

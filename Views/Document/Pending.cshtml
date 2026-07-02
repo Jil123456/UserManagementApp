@@ -1,0 +1,198 @@
+@model UserManagementApp.Models.User
+@{
+    ViewData["Title"] = "Approval Pending";
+}
+
+<style>
+    /* Premium Pending State Styles */
+    .pending-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 120px);
+        padding: 40px 20px;
+        position: relative;
+    }
+    
+    /* Background Ambience */
+    .pending-wrapper::before {
+        content: '';
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+        top: -100px;
+        left: -100px;
+        border-radius: 50%;
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    .pending-card {
+        background: #ffffff;
+        border-radius: 32px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.6);
+        width: 100%;
+        max-width: 640px;
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+        animation: card-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    
+    .pending-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #a855f7 100%);
+        padding: 48px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .pending-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .status-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+    
+    .status-icon-wrapper i {
+        font-size: 42px;
+        color: #ffffff;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        animation: float-icon 3s ease-in-out infinite;
+    }
+    
+    .spinner-ring {
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        border: 2px dashed rgba(255, 255, 255, 0.6);
+        animation: spin-ring 12s linear infinite;
+    }
+    
+    .pending-header h2 {
+        color: #ffffff;
+        font-size: 32px;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .pending-body {
+        padding: 48px 40px;
+        text-align: center;
+    }
+    
+    .pending-message {
+        color: #475569;
+        font-size: 17px;
+        line-height: 1.7;
+        margin: 0 0 36px;
+    }
+    
+    .info-badge {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        padding: 16px 24px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 12px rgba(22, 101, 52, 0.05);
+    }
+    
+    .info-badge i {
+        font-size: 20px;
+        color: #22c55e;
+        margin-right: 12px;
+    }
+    
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        color: #334155;
+        border: 2px solid #e2e8f0;
+        padding: 14px 32px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 15px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .action-btn:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        color: #0f172a;
+    }
+    
+    @@keyframes card-enter {
+        from { opacity: 0; transform: translateY(30px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    @@keyframes spin-ring { 
+        100% { transform: rotate(360deg); } 
+    }
+    
+    @@keyframes float-icon {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+        100% { transform: translateY(0); }
+    }
+</style>
+
+<div class="pending-wrapper animate-fade-in">
+    <div class="pending-card">
+        
+        <div class="pending-header">
+            <div class="status-icon-wrapper">
+                <div class="spinner-ring"></div>
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <h2>Identity Under Review</h2>
+        </div>
+        
+        <div class="pending-body">
+            <p class="pending-message">
+                <strong>Your KYC documents were submitted successfully!</strong> <br /><br />
+                Our compliance team is currently reviewing your profile to verify your identity. This process is necessary to unlock your dashboard and usually takes <strong>24-48 hours</strong>.
+            </p>
+
+            <div class="info-badge">
+                <i class="fas fa-shield-check"></i> We will notify you once you are approved
+            </div>
+
+            <div>
+                <a asp-controller="Auth" asp-action="Logout" class="action-btn">
+                    <i class="fas fa-right-from-bracket" style="margin-right: 10px; color: #64748b;"></i> Log Out Safely
+                </a>
+            </div>
+        </div>
+        
+    </div>
+</div>

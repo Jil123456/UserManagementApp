@@ -1,0 +1,157 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Login Successful";
+    var username = Context.Session.GetString("Username") ?? "User";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Successful</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #05070f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .ls-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+        }
+        .ls-orb--indigo {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+            top: -10%; right: -5%;
+            animation: ls-float 14s ease-in-out infinite alternate;
+        }
+        .ls-orb--emerald {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(16,185,129,0.25) 0%, transparent 70%);
+            bottom: -10%; left: -5%;
+            animation: ls-float 16s ease-in-out infinite alternate-reverse;
+        }
+        @@keyframes ls-float { from{transform:translate(0,0) scale(1)} to{transform:translate(-25px,20px) scale(1.06)} }
+
+        .ls-card {
+            position: relative;
+            z-index: 10;
+            max-width: 480px;
+            width: 90%;
+            background: rgba(12, 15, 28, 0.85);
+            backdrop-filter: blur(40px) saturate(150%);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 28px;
+            padding: 60px 50px;
+            text-align: center;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+            animation: ls-enter 0.8s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @@keyframes ls-enter {
+            from { opacity:0; transform:translateY(30px) scale(0.97); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+
+        .ls-check-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 40px rgba(99,102,241,0.35);
+            animation: ls-pop 0.6s 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @@keyframes ls-pop {
+            from { opacity:0; transform:scale(0.5); }
+            to { opacity:1; transform:scale(1); }
+        }
+        .ls-check-circle i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .ls-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 10px;
+            animation: ls-fade 0.7s 0.5s both;
+        }
+        .ls-subtitle {
+            font-size: 15px;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            animation: ls-fade 0.7s 0.6s both;
+        }
+        .ls-redirect-text {
+            font-size: 13px;
+            color: #94a3b8;
+            animation: ls-fade 0.7s 0.7s both;
+        }
+        @@keyframes ls-fade {
+            from { opacity:0; transform:translateY(12px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+
+        .ls-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin: 24px auto 0;
+            overflow: hidden;
+            animation: ls-fade 0.7s 0.8s both;
+        }
+        .ls-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #ec4899);
+            border-radius: 4px;
+            animation: ls-load 2s 0.5s linear forwards;
+            width: 0%;
+        }
+        @@keyframes ls-load { from { width: 0%; } to { width: 100%; } }
+    </style>
+</head>
+<body>
+    <div class="ls-orb ls-orb--indigo"></div>
+    <div class="ls-orb ls-orb--emerald"></div>
+
+    <div class="ls-card">
+        <div class="ls-check-circle">
+            <i class="fas fa-shield-check"></i>
+        </div>
+        <h1 class="ls-title">Login Successful!</h1>
+        <p class="ls-subtitle">
+            Welcome back, <strong>@username</strong>!<br>
+            You are being redirected to your dashboard.
+        </p>
+        <p class="ls-redirect-text">Redirecting in 2 seconds...</p>
+        <div class="ls-progress">
+            <div class="ls-progress-bar"></div>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(function () {
+            window.location.href = '/Admin/Dashboard';
+        }, 2500);
+    </script>
+</body>
+</html>

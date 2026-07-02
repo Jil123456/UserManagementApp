@@ -1,0 +1,80 @@
+@model IEnumerable<UserManagementApp.Models.User>
+
+@{
+    ViewData["Title"] = "Approved Users History";
+}
+
+<div class="advanced-dashboard-container animate-fade-in">
+    <div class="premium-table-card">
+        <div class="table-utility-bar">
+            <div class="identity-info">
+                <span class="profile-name" style="font-size: 16px;"><i class="fas fa-user-check" style="color: #10b981; margin-right: 8px;"></i> Approved Users History</span>
+                <span class="profile-status-indicator">Log of all approved registrations</span>
+            </div>
+            <div class="live-pulse-badge" style="background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2);">
+                <span class="pulse-dot" style="background: #10b981; box-shadow: 0 0 8px #10b981;"></span> @Model.Count() Records
+            </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+            <table class="enterprise-matrix">
+                <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th>Contact</th>
+                        <th>Approved By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="identity-cell">
+                                    <div class="avatar-circle @(user.RoleId == 1 || user.RoleId == 3 ? "avatar-grad-admin" : "avatar-grad-user")">
+                                        @(user.Fullname?.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <div>
+                                        <div class="profile-name text-capitalize">@user.Fullname</div>
+                                        <div class="profile-status-indicator">
+                                            <span class="@(user.RoleId == 1 || user.RoleId == 3 ? "handle-admin" : "handle-user")">@@@user.Username</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-size: 13px; color: #475569;">@user.Email</div>
+                                <div class="font-mono" style="font-size: 12px; color: #64748b; margin-top: 2px;">@user.Mobile</div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(user.ActionByAdmin))
+                                {
+                                    <span style="font-weight: 600; color: #475569;"><i class="fas fa-shield-halved" style="margin-right: 4px; color: #10b981;"></i>@user.ActionByAdmin</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #94a3b8; font-style: italic;">Unknown</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 40px; color: #64748b;">
+                                <i class="fas fa-folder-open" style="font-size: 24px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+                                No approved users found in history.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+        <a href="/Admin/Dashboard" class="btn-premium-back">
+            <i class="fas fa-arrow-left-long"></i> Back to Dashboard
+        </a>
+    </div>
+</div>

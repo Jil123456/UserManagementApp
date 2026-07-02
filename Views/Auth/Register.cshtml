@@ -1,99 +1,519 @@
-﻿@{
-    ViewData["Title"] = "Create Account";
+@{
+    ViewData["Title"] = "Register";
 }
 
-<div class="auth-container">
-    <div class="split-auth-container wide-card">
+<style>
+    /* ── SCOPED REGISTER RESET ── */
+    .rx-auth-viewport, .rx-auth-viewport *, .rx-auth-viewport *::before, .rx-auth-viewport *::after {
+        margin: 0 !important; box-sizing: border-box !important;
+    }
 
-        <div class="form-pane wide-form">
-            <h2 class="auth-brand-title">Create Account</h2>
+    /* ── FULL-SCREEN DARK CANVAS ── */
+    .rx-auth-viewport {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: #05070f !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 999999 !important;
+        overflow: hidden !important;
+        font-family: 'Inter', sans-serif !important;
+    }
 
-            @if (ViewBag.Error != null)
-            {
-                <div class="register-error-banner">
-                    <span>⚠️ <b>Validation Alert:</b> @ViewBag.Error</span>
-                </div>
-            }
+    /* ── AMBIENT ORB BLOBS ── */
+    .rx-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(120px);
+        pointer-events: none;
+        will-change: transform;
+    }
+    .rx-orb--violet {
+        width: 700px; height: 700px;
+        background: radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%);
+        top: -12%; right: -8%;
+        animation: rx-float-a 15s ease-in-out infinite alternate;
+    }
+    .rx-orb--fuchsia {
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(217,70,239,0.25) 0%, transparent 70%);
+        bottom: -10%; left: -5%;
+        animation: rx-float-b 17s ease-in-out infinite alternate;
+    }
+    .rx-orb--sky {
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(56,189,248,0.18) 0%, transparent 70%);
+        top: 45%; left: 30%;
+        animation: rx-float-c 12s ease-in-out infinite alternate;
+    }
+    @@keyframes rx-float-a { from{transform:translate(0,0) scale(1)} to{transform:translate(-35px,30px) scale(1.08)} }
+    @@keyframes rx-float-b { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,-35px) scale(1.06)} }
+    @@keyframes rx-float-c { from{transform:translate(0,0) scale(1)} to{transform:translate(20px,25px) scale(1.1)} }
 
-            <form method="post" action="/Auth/Register">
-                @Html.AntiForgeryToken()
+    /* ── NOISE OVERLAY ── */
+    .rx-noise {
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+        opacity: 0.5;
+        pointer-events: none;
+        z-index: 1;
+    }
 
-                <div class="register-grid">
-                    <div class="input-group">
-                        <input type="text" name="Fullname" required placeholder=" " />
-                        <label>Full Name</label>
-                    </div>
+    /* ── MAIN CARD ── */
+    .rx-card {
+        position: relative !important;
+        z-index: 10 !important;
+        width: 100% !important;
+        max-width: 600px !important;
+        background: rgba(12, 15, 28, 0.85) !important;
+        backdrop-filter: blur(40px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(40px) saturate(150%) !important;
+        border: 1px solid rgba(255,255,255,0.07) !important;
+        border-radius: 28px !important;
+        box-shadow:
+            0 50px 100px rgba(0,0,0,0.5),
+            0 0 0 1px rgba(255,255,255,0.03) inset,
+            0 1px 0 rgba(255,255,255,0.05) inset !important;
+        overflow: hidden !important;
+        padding: 48px 52px 42px !important;
+        animation: rx-card-enter 0.8s cubic-bezier(0.16,1,0.3,1) both !important;
+    }
 
-                    <div class="input-group">
-                        <input type="text" name="Username" required placeholder=" " />
-                        <label>Username</label>
-                    </div>
+    /* ── OVERRIDE GLOBAL form GRID HIJACK ── */
+    .rx-card form {
+        display: block !important;
+        grid-template-columns: none !important;
+        gap: 0 !important;
+    }
+    @@keyframes rx-card-enter {
+        from { opacity:0; transform:translateY(30px) scale(0.97); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
+    }
 
-                    <div class="input-group">
-                        <input type="email" name="Email" required placeholder=" " />
-                        <label>Email Address</label>
-                    </div>
+    /* ── CARD ACCENT LINE ── */
+    .rx-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 3px;
+        border-radius: 0 0 4px 4px;
+        background: linear-gradient(90deg, #6366f1, #d946ef, #ec4899);
+    }
 
-                    <div class="input-group">
-                        <input type="text" name="Mobile" required placeholder=" " />
-                        <label>Mobile Number</label>
-                    </div>
+    /* ── HEADER ── */
+    .rx-header {
+        text-align: center;
+        margin-bottom: 36px;
+    }
+    .rx-header__icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.1));
+        border: 1px solid rgba(139,92,246,0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 22px;
+        animation: rx-fade-up 0.7s 0.2s both;
+    }
+    .rx-header__icon i {
+        font-size: 24px;
+        background: linear-gradient(135deg, #a78bfa, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .rx-header__title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+        animation: rx-fade-up 0.7s 0.3s both;
+    }
+    .rx-header__subtitle {
+        font-size: 14px;
+        color: #cbd5e1 !important;
+        animation: rx-fade-up 0.7s 0.4s both;
+    }
+    @@keyframes rx-fade-up {
+        from { opacity:0; transform:translateY(14px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
 
-                    <div class="input-group">
-                        <input type="password" name="Password" required placeholder=" " />
-                        <label>Password</label>
-                    </div>
+    /* ── ERROR BANNER ── */
+    .rx-error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.25);
+        color: #fca5a5;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13.5px;
+        font-weight: 500;
+        margin-bottom: 24px;
+        animation: rx-fade-up 0.5s 0.3s both;
+    }
 
-                    <div class="input-group">
-                        <input type="password" name="Confirmpassword" required placeholder=" " />
-                        <label>Confirm Password</label>
-                    </div>
+    /* ── FORM GRID ── */
+    .rx-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 22px !important;
+        width: 100% !important;
+        animation: rx-fade-up 0.7s 0.5s both;
+    }
+    .rx-full { grid-column: span 2 !important; }
 
-                    <div class="input-group date-group">
-                        <input type="date" name="Dob" required placeholder=" " />
-                        <label class="static-label">Date of Birth</label>
-                    </div>
+    /* ── FIELD GROUP ── */
+    .rx-field {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .rx-field__label {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #e2e8f0 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.6px !important;
+        padding: 0 0 0 2px !important;
+        margin: 0 !important;
+    }
+    .rx-field__input,
+    .rx-field__select {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 13px 16px !important;
+        background: rgba(15,20,40,0.6) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 12px !important;
+        color: #ffffff !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+        outline: none !important;
+        box-sizing: border-box !important;
+        color-scheme: dark !important;
+    }
+    /* Remove native appearance only on non-date inputs and selects */
+    .rx-field__select,
+    .rx-field__input:not([type="date"]) {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+    }
+    /* Ensure date input keeps its native picker */
+    .rx-field__input[type="date"] {
+        appearance: auto !important;
+        -webkit-appearance: auto !important;
+    }
+    .rx-field__input::placeholder {
+        color: rgba(148,163,184,0.5) !important;
+        font-weight: 400 !important;
+    }
+    .rx-field__input:focus,
+    .rx-field__select:focus {
+        border-color: rgba(99,102,241,0.5) !important;
+        background: rgba(20,25,50,0.7) !important;
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.1), 0 0 20px rgba(99,102,241,0.06) !important;
+    }
 
-                    <div class="input-group select-group">
-                        <select name="Role" class="select-role">
-                            <option value="user">User Role</option>
-                            <option value="admin">Admin Access</option>
-                        </select>
-                    </div>
-                </div>
+    /* ── SELECT ARROW ── */
+    .rx-select-wrap {
+        position: relative;
+    }
+    .rx-select-wrap::after {
+        content: '\f078';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 16px;
+        bottom: 14px;
+        font-size: 12px;
+        color: #64748b;
+        pointer-events: none;
+    }
+    .rx-field__select {
+        cursor: pointer;
+        padding-right: 40px;
+    }
+    .rx-field__select option {
+        background: #0f1322;
+        color: #ffffff;
+    }
 
-                <div style="margin-top: 15px;">
-                    <button type="submit" class="btn-gradient-submit">REGISTER</button>
-                </div>
-            </form>
+    /* ── SUBMIT BUTTON ── */
+    .rx-submit {
+        width: 100% !important;
+        padding: 15px !important;
+        margin-top: 32px !important;
+        border: none !important;
+        border-radius: 14px !important;
+        background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899) !important;
+        background-size: 200% 200% !important;
+        color: #ffffff !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        font-family: 'Inter', sans-serif !important;
+        cursor: pointer !important;
+        transition: all 0.35s cubic-bezier(0.4,0,0.2,1) !important;
+        box-shadow: 0 8px 30px rgba(99,102,241,0.25) !important;
+        animation: rx-fade-up 0.7s 0.6s both;
+        position: relative !important;
+        overflow: hidden !important;
+        grid-column: span 1 !important;
+    }
+    .rx-submit::before {
+        content: '' !important;
+        position: absolute !important;
+        inset: 0 !important;
+        background: linear-gradient(135deg, transparent, rgba(255,255,255,0.12), transparent) !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.6s ease !important;
+    }
+    .rx-submit:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 14px 40px rgba(99,102,241,0.35) !important;
+        background-position: 100% 0 !important;
+    }
+    .rx-submit:hover::before {
+        transform: translateX(100%) !important;
+    }
+    .rx-submit:active {
+        transform: translateY(0) !important;
+    }
 
-            <div class="switch-link" style="text-align: center; margin-top: 15px; font-size: 13px; color: #718096;">
-                Already have an account? <a href="/Auth/Login" style="color: #4f46e5; font-weight: 600; text-decoration: none;">Login Workspace</a>
+    /* ── FOOTER ── */
+    .rx-footer {
+        text-align: center !important;
+        margin-top: 24px !important;
+        font-size: 13.5px !important;
+        color: #cbd5e1 !important;
+        animation: rx-fade-up 0.7s 0.7s both;
+        grid-column: span 1 !important;
+    }
+    .rx-footer a {
+        color: #a78bfa !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+        transition: color 0.25s ease !important;
+    }
+    .rx-footer a:hover {
+        color: #c4b5fd !important;
+        text-decoration: underline !important;
+    }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @@media (max-width: 640px) {
+        .rx-card {
+            max-width: 95%;
+            padding: 36px 28px 32px;
+            margin: 16px;
+        }
+        .rx-grid {
+            grid-template-columns: 1fr;
+        }
+        .rx-full { grid-column: span 1; }
+    }
+
+    /* ── MATH CAPTCHA ── */
+    .rx-captcha-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: rgba(139,92,246,0.06);
+        border: 1.5px solid rgba(139,92,246,0.15);
+        grid-column: 1 / -1;
+        margin-top: 22px;
+    }
+    .rx-captcha-icon {
+        width: 38px; height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .rx-captcha-icon i { font-size: 15px; color: #fff; }
+    .rx-captcha-question {
+        font-size: 14px;
+        font-weight: 600;
+        color: #c7d2fe;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    .rx-captcha-question span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.08);
+        border-radius: 8px;
+        padding: 2px 10px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #a5b4fc;
+        margin: 0 2px;
+        min-width: 30px;
+    }
+    .rx-captcha-equals {
+        font-size: 18px;
+        font-weight: 700;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+    .rx-captcha-input {
+        width: 70px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1.5px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.05);
+        color: #e2e8f0;
+        font-size: 16px;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+        outline: none;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+    .rx-captcha-input:focus {
+        border-color: rgba(139,92,246,0.5);
+        background: rgba(139,92,246,0.08);
+        box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+    }
+    .rx-captcha-input::placeholder { color: #475569; font-weight: 500; }
+</style>
+
+<div class="rx-auth-viewport">
+
+    <!-- Ambient background orbs -->
+    <div class="rx-orb rx-orb--violet"></div>
+    <div class="rx-orb rx-orb--fuchsia"></div>
+    <div class="rx-orb rx-orb--sky"></div>
+    <div class="rx-noise"></div>
+
+    <!-- Main card -->
+    <div class="rx-card">
+
+        <!-- Header -->
+        <div class="rx-header">
+            <div class="rx-header__icon">
+                <i class="fas fa-user-plus"></i>
             </div>
+            <h2 class="rx-header__title">Create Account</h2>
+            <p class="rx-header__subtitle">Register to get access to the dashboard</p>
         </div>
 
-        <div class="banner-pane" style="width: 42% !important; height: 100%; position: relative; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; text-align: center !important; padding: 0 40px !important; overflow: hidden;">
+        <!-- Error banner -->
+        @if (ViewBag.Error != null)
+        {
+            <div class="rx-error">⚠️ @ViewBag.Error</div>
+        }
 
-            <div class="liquid-blob blob-1"></div>
-            <div class="liquid-blob blob-2"></div>
-            <div class="liquid-blob blob-3"></div>
+        <!-- Registration form -->
+        <form method="post" action="/Auth/Register">
+            @Html.AntiForgeryToken()
 
-            <div style="position: relative; z-index: 5; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; width: 100%;">
+            <div class="rx-grid">
 
-                <h2 style="font-size: 36px !important; font-weight: 800 !important; color: #ffffff !important; margin-bottom: 16px !important; text-align: center !important; letter-spacing: -0.5px !important; -webkit-text-fill-color: #ffffff !important; background: none !important;">
-                    Join Us!
-                </h2>
+                <div class="rx-field rx-full">
+                    <label class="rx-field__label">Full Name</label>
+                    <input type="text" name="Fullname" required placeholder="Enter full name" class="rx-field__input" />
+                </div>
 
-                <p style="font-size: 14px !important; color: rgba(255, 255, 255, 0.95) !important; line-height: 1.6 !important; margin-bottom: 35px !important; text-align: center !important; padding: 0 10px !important;">
-                    Set up your profile credentials to access the system platform
-                </p>
+                <div class="rx-field">
+                    <label class="rx-field__label">Username</label>
+                    <input type="text" name="Username" required placeholder="Enter username" class="rx-field__input" />
+                </div>
 
-                <a href="/Auth/Login" style="padding: 12px 45px !important; border: 2px solid #ffffff !important; border-radius: 25px !important; background: #ffffff !important; color: #4f46e5 !important; font-weight: 700 !important; font-size: 13px !important; letter-spacing: 1px !important; text-decoration: none !important; display: inline-block !important; transition: all 0.2s ease-in-out !important; box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;">
-                    SIGN IN
-                </a>
+                <div class="rx-field">
+                    <label class="rx-field__label">Email</label>
+                    <input type="email" name="Email" required placeholder="Enter email" class="rx-field__input" />
+                </div>
+
+                <div class="rx-field">
+                    <label class="rx-field__label">Mobile</label>
+                    <input type="text" name="Mobile" required placeholder="Enter mobile" class="rx-field__input" />
+                </div>
+
+                <div class="rx-field">
+                    <label class="rx-field__label">Password</label>
+                    <input type="password" name="Password" required placeholder="Enter password" class="rx-field__input" />
+                </div>
+
+                <div class="rx-field">
+                    <label class="rx-field__label">Confirm Password</label>
+                    <input type="password" name="Confirmpassword" required placeholder="Confirm password" class="rx-field__input" />
+                </div>
+
+                <div class="rx-field">
+                    <label class="rx-field__label"><i class="fas fa-calendar-alt rx-field__icon"></i>Date of Birth</label>
+                    <input type="date" name="Dob" required class="rx-field__input" id="rx-dob-input" />
+                </div>
+
+                <div class="rx-field">
+                    <label class="rx-field__label"><i class="fas fa-user-tag rx-field__icon"></i>Select Role</label>
+                    <select name="RoleId" required class="rx-field__input" style="appearance: none; background: url('data:image/svg+xml;utf8,<svg fill=%22%2394a3b8%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 12px center; padding-right: 40px;">
+                        @if (ViewBag.Roles != null)
+                        {
+                            foreach (var role in (IEnumerable<UserManagementApp.Models.RoleMaster>)ViewBag.Roles)
+                            {
+                                if (role.RoleId == 2)
+                                {
+                                    <option value="@role.RoleId" selected>@role.RoleName</option>
+                                }
+                                else
+                                {
+                                    <option value="@role.RoleId">@role.RoleName</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
 
             </div>
-        </div>
+
+            <!-- Math Captcha -->
+            <div class="rx-captcha-box">
+                <div class="rx-captcha-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="rx-captcha-question">
+                    <span>@ViewBag.CaptchaNum1</span> + <span>@ViewBag.CaptchaNum2</span>
+                </div>
+                <span class="rx-captcha-equals">=</span>
+                <input type="number" name="CaptchaAnswer" required class="rx-captcha-input" placeholder="?" autocomplete="off" />
+            </div>
+
+            <button type="submit" class="rx-submit">Create Account</button>
+
+            <div class="rx-footer">
+                Already have an account? <a href="/Auth/Login">Sign In</a>
+            </div>
+        </form>
 
     </div>
 </div>
+
+<script>
+    // Prevent future dates in Date of Birth field
+    (function () {
+        var today = new Date().toISOString().split('T')[0];
+        var dobInput = document.getElementById('rx-dob-input');
+        if (dobInput) {
+            dobInput.setAttribute('max', today);
+        }
+    })();
+</script>

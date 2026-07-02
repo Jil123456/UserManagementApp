@@ -1,43 +1,49 @@
-﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UserManagementApp.Models
 {
-    [Table("usermaster")] // ✅ CORRECT PLACE
     public class User
     {
-        [Key]
-        [Column("userid")]
         public int UserId { get; set; }
 
-        [Required]
-        [Column("fullname")]
+        [Required(ErrorMessage = "Full name is required")]
         public string Fullname { get; set; } = null!;
 
-        [Required]
-        [Column("username")]
+        [Required(ErrorMessage = "Username is required")]
         public string Username { get; set; } = null!;
-        [Required]
-        [StringLength(200)]
-        [Column("password")]
+
+        // No [Required] here — Password is only validated during registration
         public string Password { get; set; } = null!;
 
-        [Required]
-        [Column("email")]
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress]
         public string Email { get; set; } = null!;
 
-        [Required]
-        [Column("mobile")]
+        [Required(ErrorMessage = "Mobile is required")]
         public string Mobile { get; set; } = null!;
 
-        [Column("dob")]
         public DateTime Dob { get; set; }
 
-        [Column("roleid")]
-        public int RoleId { get; set; }  // 🔥 IMPORTANT CHANGE
+        public int RoleId { get; set; }
+        
+        public string? RoleName { get; set; }
 
-        [Column("createddate")]
         public DateTime CreatedDate { get; set; }
+
+        public string Status { get; set; } = "Pending";
+
+        public string? RejectReason { get; set; }
+
+        public bool HasUnreadApproval { get; set; }
+
+        public string? ActionByAdmin { get; set; }
+
+        public bool IsActive { get; set; } = true;
+        
+        public bool IsDeleted { get; set; } = false;
+        
+        public string DocStatus { get; set; } = "pending";
+
+        public int UploadAttempts { get; set; } = 0;
     }
 }

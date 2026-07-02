@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UserManagementApp.Models;
+using Microsoft.AspNetCore.Mvc;
 using UserManagementApp.Helpers;
+using UserManagementApp.Services;
+using UserManagementApp.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Linq;
 
 namespace UserManagementApp.Controllers
 {
@@ -10,18 +10,20 @@ namespace UserManagementApp.Controllers
     [ApiController]
     public class AuthApiController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserService _userService;
 
-        public AuthApiController(AppDbContext context)
+        public AuthApiController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         // REGISTER API
         [HttpPost("register")]
         public IActionResult Register([FromBody] User user)
         {
-            if (_context.Users.Any(u => u.Username == user.Username))
+            // Duplicate username check
+            var existing = _userService.GetUserByUsername(user.Username);
+            if (existing != null)
                 return BadRequest("Username already exists");
 
             var hasher = new PasswordHasher<User>();
@@ -31,8 +33,7 @@ namespace UserManagementApp.Controllers
             user.RoleId = user.RoleId == 1 ? 1 : 2;
             user.CreatedDate = DateTime.UtcNow;
 
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            _userService.AddUser(user);
 
             return Ok("User Registered Successfully ✅");
         }
@@ -41,7 +42,7 @@ namespace UserManagementApp.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Username == model.Username);
+            var user = _userService.GetUserByUsername(model.Username);
 
             if (user == null)
                 return Unauthorized("Invalid Username");
@@ -52,7 +53,6 @@ namespace UserManagementApp.Controllers
             if (result != PasswordVerificationResult.Success)
                 return Unauthorized("Invalid Password");
 
-            // ✅ Generate JWT
             var token = JwtHelper.GenerateToken(user.Username, user.RoleId);
 
             return Ok(new

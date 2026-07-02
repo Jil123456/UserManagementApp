@@ -1,0 +1,263 @@
+@model IEnumerable<UserManagementApp.Models.UserDocument>
+
+@{
+    ViewData["Title"] = "All Documents";
+}
+
+<div class="advanced-dashboard-container animate-fade-in">
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 14px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; margin-bottom: 16px;">
+            <i class="fas fa-check-circle" style="margin-right: 8px;"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; margin-bottom: 16px;">
+            <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="premium-table-card">
+        <div class="table-utility-bar">
+            <div class="identity-info">
+                <span class="profile-name" style="font-size: 16px;"><i class="fas fa-folder-open" style="color: #f59e0b; margin-right: 8px;"></i> Document Management</span>
+                <span class="profile-status-indicator">Review, approve or reject uploaded documents</span>
+            </div>
+            <div class="live-pulse-badge">
+                <span class="pulse-dot"></span> @Model.Count() Documents
+            </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+            <table class="enterprise-matrix">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Document Type</th>
+                        <th>File</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div style="font-weight: 600;">@doc.Fullname</div>
+                                <div style="font-size: 12px; color: #94a3b8;">@@@doc.Username</div>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(doc.DocumentType))
+                                {
+                                    <span style="padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(99,102,241,0.1); color: #6366f1;">@doc.DocumentType</span>
+                                }
+                                else
+                                {
+                                    <span style="padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; background: rgba(139,92,246,0.1); color: #8b5cf6;">KYC Documents</span>
+                                }
+                            </td>
+                            <td style="max-width: 200px;">
+                                @if (!string.IsNullOrEmpty(doc.FilePath))
+                                {
+                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@doc.DisplayFileName">
+                                        <a href="javascript:void(0)" onclick="openDocModal(@doc.DocumentId, '@Url.Content(doc.FilePath?.Replace("\\", "/"))', '@doc.Status')" style="color: #6366f1; text-decoration: none; font-weight: 500; font-size: 13px;">
+                                            <i class="fas fa-file-pdf" style="margin-right: 4px; color: #ef4444;"></i> @doc.DisplayFileName
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <button type="button" onclick="openDocModal(@doc.DocumentId, '@Url.Content((doc.AadhaarPath ?? doc.FilePath)?.Replace("\\", "/"))', '@doc.Status')" style="padding: 4px 10px; border-radius: 6px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #3b82f6; cursor: pointer; font-weight: 500; font-size: 12px; display: inline-flex; align-items: center;">
+                                            <i class="fas fa-eye" style="margin-right: 6px;"></i> Aadhaar
+                                        </button>
+                                        <button type="button" onclick="openDocModal(@doc.DocumentId, '@Url.Content((doc.PanPath ?? doc.FilePath)?.Replace("\\", "/"))', '@doc.Status')" style="padding: 4px 10px; border-radius: 6px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #10b981; cursor: pointer; font-weight: 500; font-size: 12px; display: inline-flex; align-items: center;">
+                                            <i class="fas fa-eye" style="margin-right: 6px;"></i> PAN
+                                        </button>
+                                    </div>
+                                }
+                            </td>
+                            <td style="font-size: 13px; color: #64748b;">@doc.UploadedDate.ToString("dd MMM yyyy")</td>
+                            <td>
+                                @if (doc.Status == "Approved")
+                                {
+                                    <span style="padding: 4px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; background: rgba(16,185,129,0.1); color: #10b981; display: inline-block; margin-bottom: 4px;">
+                                        <i class="fas fa-check-circle" style="margin-right: 4px;"></i> Approved
+                                        <i class="fas fa-lock" style="margin-left: 4px; font-size: 10px;"></i>
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(doc.ActionByAdmin))
+                                    {
+                                        <div style="font-size: 10px; color: #6b7280; margin-top: 2px;">By: @doc.ActionByAdmin</div>
+                                    }
+                                }
+                                else if (doc.Status == "Rejected")
+                                {
+                                    <span style="padding: 4px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; background: rgba(239,68,68,0.1); color: #ef4444; display: inline-block; margin-bottom: 4px;"><i class="fas fa-times-circle" style="margin-right: 4px;"></i> Rejected</span>
+                                    @if (!string.IsNullOrEmpty(doc.ActionByAdmin))
+                                    {
+                                        <div style="font-size: 10px; color: #6b7280; margin-top: 2px;">By: @doc.ActionByAdmin</div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span style="padding: 4px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; background: rgba(245,158,11,0.1); color: #f59e0b;"><i class="fas fa-clock" style="margin-right: 4px;"></i> Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    @if (doc.Status != "Approved")
+                                    {
+                                        if (!string.IsNullOrEmpty(doc.FilePath))
+                                        {
+                                            <button type="button" onclick="openDocModal(@doc.DocumentId, '@Url.Content(doc.FilePath.Replace("\\", "/"))', '@doc.Status')" title="View Document" style="width:32px;height:32px;border-radius:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#3b82f6;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        }
+
+                                        <form action="/Document/Delete" method="post" style="margin:0;" onsubmit="return confirm('Are you sure you want to permanently delete this document?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@doc.DocumentId" />
+                                            <button type="submit" title="Delete" style="width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" onclick="openDocModal(@doc.DocumentId, '@Url.Content(doc.FilePath?.Replace("\\", "/"))', '@doc.Status')" title="View Document" style="width:32px;height:32px;border-radius:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#3b82f6;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;margin-right: 4px;">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <span style="font-size: 12px; color: #94a3b8; font-weight: 600; margin-right: 4px;">
+                                            <i class="fas fa-lock" style="margin-right: 4px;"></i> Locked
+                                        </span>
+                                    }
+
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+        <a href="/Admin/Dashboard" class="btn-premium-back"><i class="fas fa-arrow-left-long"></i> Back to Dashboard</a>
+    </div>
+</div>
+
+<!-- Document Review Modal -->
+<div id="docReviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+    <div style="background:white; width:85%; max-width:1000px; height:85%; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div style="padding:20px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:rgba(59,130,246,0.1); color:#3b82f6; display:flex; align-items:center; justify-content:center; font-size:18px;">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <div>
+                    <h3 style="margin:0; font-size:18px; font-weight:700; color:#0f172a;">Document Viewer</h3>
+                    <div style="font-size:13px; color:#64748b; margin-top:2px;">Review document before taking action</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <a id="openNewTabBtn" href="#" target="_blank" style="background:rgba(59,130,246,0.1); border:none; width:36px; height:36px; border-radius:50%; font-size:16px; color:#3b82f6; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; text-decoration:none; margin-right: 12px;" title="Open in new tab" onmouseover="this.style.background='rgba(59,130,246,0.2)';" onmouseout="this.style.background='rgba(59,130,246,0.1)';">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                <button type="button" onclick="closeDocModal()" style="background:rgba(226,232,240,0.5); border:none; width:36px; height:36px; border-radius:50%; font-size:18px; color:#64748b; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='#e2e8f0'; this.style.color='#0f172a';" onmouseout="this.style.background='rgba(226,232,240,0.5)'; this.style.color='#64748b';">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="docContainer" style="flex:1; padding:0; background:#e2e8f0; position:relative; overflow:auto;">
+            <!-- Document will be injected here -->
+        </div>
+        <div style="padding:20px 24px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:white;">
+            <div id="modalStatusLabel" style="font-size:14px; font-weight:600; color:#64748b;">
+                <!-- Status will be injected here -->
+            </div>
+            <div style="display:flex; gap:12px;">
+                @if (Context.Session.GetInt32("RoleId") == 3)
+                {
+                    <form id="approveForm" action="/Admin/Document/Approve" method="post" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" id="approveDocId" value="" />
+                        <button type="submit" style="padding:10px 20px; border-radius:10px; background:#10b981; border:none; color:white; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 6px -1px rgba(16,185,129,0.2); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(16,185,129,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(16,185,129,0.2)';">
+                            <i class="fas fa-check-circle"></i> Approve Document
+                        </button>
+                    </form>
+                    <form id="rejectForm" action="/Admin/Document/Reject" method="post" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" id="rejectDocId" value="" />
+                        <button type="submit" style="padding:10px 20px; border-radius:10px; background:#ef4444; border:none; color:white; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 6px -1px rgba(239,68,68,0.2); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(239,68,68,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(239,68,68,0.2)';">
+                            <i class="fas fa-times-circle"></i> Reject Document
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <span style="display: inline-flex; align-items: center; padding: 10px 20px; background: rgba(245,158,11,0.1); color: #d97706; border-radius: 10px; font-size: 14px; font-weight: 600;">
+                        <i class="fas fa-lock" style="margin-right: 8px;"></i> Super Admin Only
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDocModal(docId, filePath, status) {
+    var container = document.getElementById('docContainer');
+    document.getElementById('approveDocId').value = docId;
+    document.getElementById('rejectDocId').value = docId;
+
+    if (!filePath || filePath.trim() === '') {
+        document.getElementById('openNewTabBtn').style.display = 'none';
+        container.innerHTML = '<div style="padding:60px 20px; text-align:center; color:#64748b;">' +
+                              '<i class="fas fa-exclamation-triangle" style="font-size:48px; color:#ef4444; margin-bottom:16px;"></i>' +
+                              '<h3 style="margin:0 0 8px 0; color:#334155;">File Not Found</h3>' +
+                              '<p style="margin:0;">This document record has an empty or invalid file path in the database.</p>' +
+                              '</div>';
+    } else {
+        document.getElementById('openNewTabBtn').style.display = 'flex';
+        document.getElementById('openNewTabBtn').href = filePath;
+        
+        // We will inject the iframe slightly delayed to prevent the 0x0 size bug
+        container.innerHTML = '<div style="padding:40px; text-align:center; color:#64748b;"><i class="fas fa-spinner fa-spin" style="font-size:32px;"></i></div>';
+        setTimeout(function() {
+            container.innerHTML = '<iframe src="' + filePath + '#toolbar=0" style="width:100%; height:100%; border:none; min-height: 500px;" title="Document Viewer"></iframe>';
+        }, 50);
+    }
+    
+    var approveBtn = document.getElementById('approveForm');
+    var rejectBtn = document.getElementById('rejectForm');
+    var statusLabel = document.getElementById('modalStatusLabel');
+    
+    if (status === 'Approved') {
+        approveBtn.style.display = 'none';
+        rejectBtn.style.display = 'none';
+        statusLabel.innerHTML = '<span style="color:#10b981;"><i class="fas fa-lock"></i> This document is already Approved</span>';
+    } else if (status === 'Rejected') {
+        approveBtn.style.display = 'block'; // Allow admin to change their mind and approve
+        rejectBtn.style.display = 'none';
+        statusLabel.innerHTML = '<span style="color:#ef4444;"><i class="fas fa-times-circle"></i> This document is currently Rejected</span>';
+    } else {
+        approveBtn.style.display = 'block';
+        rejectBtn.style.display = 'block';
+        statusLabel.innerHTML = '<span style="color:#f59e0b;"><i class="fas fa-clock"></i> Pending Review</span>';
+    }
+    
+    // Show the modal FIRST so it has physical dimensions
+    document.getElementById('docReviewModal').style.display = 'flex';
+}
+
+function closeDocModal() {
+    document.getElementById('docReviewModal').style.display = 'none';
+    document.getElementById('docContainer').innerHTML = '';
+}
+</script>
+

@@ -1,0 +1,497 @@
+@model UserManagementApp.Models.KycDashboardViewModel
+@{
+    ViewData["Title"] = "KYC Verification Dashboard";
+}
+
+<style>
+    .kyc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .kyc-filters {
+        display: flex;
+        gap: 16px;
+        background: #ffffff;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+    }
+
+    .filter-input {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .filter-input:focus {
+        border-color: #6366f1;
+    }
+
+    .tab-container {
+        display: flex;
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 24px;
+    }
+
+    .tab-btn {
+        padding: 12px 24px;
+        font-weight: 600;
+        font-size: 15px;
+        color: #64748b;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: -2px;
+    }
+
+    .tab-btn.active {
+        color: #4f46e5;
+        border-bottom-color: #4f46e5;
+    }
+
+    .tab-btn:hover:not(.active) {
+        color: #334155;
+        border-bottom-color: #cbd5e1;
+    }
+
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .kyc-table {
+        width: 100%;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        border-collapse: collapse;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .kyc-table th {
+        background: #f8fafc;
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #475569;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .kyc-table td {
+        padding: 16px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .kyc-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .kyc-table tr:hover {
+        background: #f8fafc;
+    }
+
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-approve {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-approve:hover {
+        background: #059669;
+    }
+
+    .btn-reject {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-reject:hover {
+        background: #dc2626;
+    }
+
+    .badge-status {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-pending { background: #fef3c7; color: #d97706; }
+    .status-approved { background: #d1fae5; color: #059669; }
+    .status-rejected { background: #fee2e2; color: #dc2626; }
+
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 400px;
+        padding: 24px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        transform: scale(0.95);
+        opacity: 0;
+        transition: all 0.2s;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="advanced-dashboard-container animate-fade-in">
+    <div class="kyc-header">
+        <div>
+            <h2 style="margin: 0; font-size: 24px; color: #1e293b;"><i class="fas fa-shield-check" style="color: #4f46e5;"></i> KYC Verification Center</h2>
+            <p style="margin: 4px 0 0; color: #64748b;">Manage and review user identity documents securely.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: #d1fae5; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 500;">
+            @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 500;">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="kyc-filters">
+        <div style="flex: 1; position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 14px; top: 12px; color: #94a3b8;"></i>
+            <input type="text" id="searchInput" class="filter-input" placeholder="Search by user name..." style="padding-left: 40px;" onkeyup="filterTables()">
+        </div>
+        <select id="roleFilter" class="filter-input" style="max-width: 200px;" onchange="filterTables()">
+            <option value="">All Roles</option>
+            @if (ViewBag.AllRoles != null)
+            {
+                foreach (var role in ViewBag.AllRoles)
+                {
+                    <option value="@role.RoleName">@role.RoleName</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="switchTab('pending')">
+            <i class="fas fa-clock-rotate-left"></i> Pending KYC
+            <span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 6px;">@Model.PendingKyc.Count</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('history')">
+            <i class="fas fa-clock-rotate-left"></i> KYC History
+        </button>
+    </div>
+
+    <!-- PENDING TAB -->
+    <div id="tab-pending" class="tab-content active">
+        <table class="kyc-table" id="pendingTable">
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Role</th>
+                    <th>Uploaded Documents</th>
+                    <th>Upload Date</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.PendingKyc.Any())
+                {
+                    <tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 32px;">No pending KYC requests at this time.</td></tr>
+                }
+                @foreach (var doc in Model.PendingKyc)
+                {
+                    <tr class="kyc-row" data-name="@doc.Fullname?.ToLower()" data-role="@doc.Role">
+                        <td>
+                            <div style="font-weight: 600; color: #0f172a;">@doc.Fullname</div>
+                            <div style="font-size: 12px; color: #64748b;">@doc.Username</div>
+                        </td>
+                        <td>
+                            <span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                @doc.Role
+                            </span>
+                        </td>
+                        <td>
+                            <button type="button" onclick="openKycDocModal('@doc.FilePath')" style="color: #4f46e5; text-decoration: none; font-size: 13px; background: #e0e7ff; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; text-align: left;">
+                                @if (doc.DocumentType == "Aadhar Card")
+                                {
+                                    <i class="fas fa-id-card"></i> @:Aadhaar Card
+                                }
+                                else if (doc.DocumentType == "PAN Card")
+                                {
+                                    <i class="fas fa-money-check"></i> @:PAN Card
+                                }
+                                else
+                                {
+                                    <i class="fas fa-file-pdf"></i> @doc.DocumentType
+                                }
+                            </button>
+                        </td>
+                        <td>@doc.UploadedDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        <td style="text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
+                            <form action="/Admin/AdminDoc/Approve" method="post" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="docId" value="@doc.DocumentId" />
+                                <button type="submit" class="btn-action btn-approve"><i class="fas fa-check"></i> Approve</button>
+                            </form>
+                            <button type="button" class="btn-action btn-reject" onclick="openRejectModal(@doc.DocumentId, '@doc.Fullname - @doc.DocumentType')"><i class="fas fa-times"></i> Reject</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-history" class="tab-content">
+        <table class="kyc-table" id="historyTable">
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Role</th>
+                    <th>Uploaded Documents</th>
+                    <th>Status</th>
+                    <th>Verified By</th>
+                    <th>Verified Date</th>
+                    <th>Rejection Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.HistoryKyc.Any())
+                {
+                    <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 32px;">No historical KYC records found.</td></tr>
+                }
+                @foreach (var doc in Model.HistoryKyc)
+                {
+                    <tr class="kyc-row" data-name="@doc.Fullname?.ToLower()" data-role="@doc.Role">
+                        <td>
+                            <div style="font-weight: 600; color: #0f172a;">@doc.Fullname</div>
+                        </td>
+                        <td>
+                            <span style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                @doc.Role
+                            </span>
+                        </td>
+                        <td>
+                            <button type="button" onclick="openKycDocModal('@doc.FilePath')" style="color: #4f46e5; text-decoration: none; font-size: 13px; background: #e0e7ff; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; text-align: left;">
+                                @if (doc.DocumentType == "Aadhar Card")
+                                {
+                                    <i class="fas fa-id-card"></i> @:Aadhaar Card
+                                }
+                                else if (doc.DocumentType == "PAN Card")
+                                {
+                                    <i class="fas fa-money-check"></i> @:PAN Card
+                                }
+                                else
+                                {
+                                    <i class="fas fa-file-pdf"></i> @doc.DocumentType
+                                }
+                            </button>
+                        </td>
+                        <td>
+                            @if (doc.Status == "Approved")
+                            {
+                                <span class="badge-status status-approved"><i class="fas fa-check-circle"></i> Approved</span>
+                            }
+                            else if (doc.Status == "Rejected")
+                            {
+                                <span class="badge-status status-rejected"><i class="fas fa-times-circle"></i> Rejected</span>
+                            }
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <div style="width: 24px; height: 24px; background: #6366f1; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">
+                                    SA
+                                </div>
+                                <span style="font-weight: 500; font-size: 13px;">@(doc.ActionByAdmin ?? "Super Admin")</span>
+                            </div>
+                        </td>
+                        <td style="font-size: 13px;">@(doc.ReviewedAt?.ToString("MMM dd, yyyy HH:mm") ?? "-")</td>
+                        <td style="font-size: 13px; color: #ef4444; max-width: 200px;">
+                            @(string.IsNullOrEmpty(doc.RejectionReason) ? "-" : doc.RejectionReason)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 style="margin: 0 0 16px; color: #0f172a; font-size: 18px;">Reject KYC for <span id="rejectUserName" style="color: #ef4444;"></span></h3>
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Please provide a clear reason for rejecting the KYC documents. The user will see this reason.</p>
+        
+        <form action="/Admin/AdminDoc/Reject" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="docId" id="rejectDocId" />
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 8px;">Rejection Reason <span style="color: #ef4444;">*</span></label>
+                <textarea name="reason" required class="filter-input" rows="3" style="width: 100%; box-sizing: border-box; resize: none;" placeholder="E.g., Aadhaar card is blurry and unreadable."></textarea>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn-action" style="background: #f1f5f9; color: #475569;" onclick="closeRejectModal()">Cancel</button>
+                <button type="submit" class="btn-action btn-reject"><i class="fas fa-ban"></i> Confirm Rejection</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Document Viewer Modal -->
+<div id="kycDocViewerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px);">
+    <div style="background:white; width:85%; max-width:1000px; height:85%; border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+        <div style="padding:20px 24px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:rgba(59,130,246,0.1); color:#3b82f6; display:flex; align-items:center; justify-content:center; font-size:18px;">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <div>
+                    <h3 style="margin:0; font-size:18px; font-weight:700; color:#0f172a;">Document Viewer</h3>
+                    <div style="font-size:13px; color:#64748b; margin-top:2px;">Review document before taking action</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <a id="kycOpenNewTabBtn" href="#" target="_blank" style="background:rgba(59,130,246,0.1); border:none; width:36px; height:36px; border-radius:50%; font-size:16px; color:#3b82f6; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; text-decoration:none; margin-right: 12px;" title="Open in new tab" onmouseover="this.style.background='rgba(59,130,246,0.2)';" onmouseout="this.style.background='rgba(59,130,246,0.1)';">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                <button type="button" onclick="closeKycDocModal()" style="background:rgba(226,232,240,0.5); border:none; width:36px; height:36px; border-radius:50%; font-size:18px; color:#64748b; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='#e2e8f0'; this.style.color='#0f172a';" onmouseout="this.style.background='rgba(226,232,240,0.5)'; this.style.color='#64748b';">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="kycDocContainer" style="flex:1; padding:0; background:#e2e8f0; position:relative; overflow:auto;">
+            <!-- Document will be injected here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function openKycDocModal(filePath) {
+        var modal = document.getElementById('kycDocViewerModal');
+        var container = document.getElementById('kycDocContainer');
+        var newTabBtn = document.getElementById('kycOpenNewTabBtn');
+
+        if (!filePath || filePath.trim() === '') {
+            newTabBtn.style.display = 'none';
+            container.innerHTML = '<div style="padding:60px 20px; text-align:center; color:#64748b;">' +
+                                  '<i class="fas fa-exclamation-triangle" style="font-size:48px; color:#ef4444; margin-bottom:16px;"></i>' +
+                                  '<h3 style="margin:0 0 8px 0; color:#334155;">File Not Found</h3>' +
+                                  '<p style="margin:0;">This document has an empty file path.</p>' +
+                                  '</div>';
+        } else {
+            newTabBtn.style.display = 'flex';
+            newTabBtn.href = filePath;
+            container.innerHTML = '<div style="padding:40px; text-align:center; color:#64748b;"><i class="fas fa-spinner fa-spin" style="font-size:32px;"></i></div>';
+            setTimeout(function() {
+                container.innerHTML = '<iframe src="' + filePath + '#toolbar=0" style="width:100%; height:100%; border:none; min-height: 500px;" title="Document Viewer"></iframe>';
+            }, 50);
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeKycDocModal() {
+        var modal = document.getElementById('kycDocViewerModal');
+        var container = document.getElementById('kycDocContainer');
+        modal.style.display = 'none';
+        container.innerHTML = '';
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function openRejectModal(docId, fullname) {
+        document.getElementById('rejectDocId').value = docId;
+        document.getElementById('rejectUserName').innerText = fullname;
+        document.getElementById('rejectModal').classList.add('active');
+        document.querySelector('textarea[name="reason"]').value = '';
+    }
+
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.remove('active');
+    }
+
+    function filterTables() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const roleFilter = document.getElementById('roleFilter').value;
+
+        document.querySelectorAll('.kyc-row').forEach(row => {
+            const name = row.getAttribute('data-name') || '';
+            const role = row.getAttribute('data-role') || '';
+
+            const matchesSearch = name.includes(searchTerm);
+            const matchesRole = roleFilter === '' || role === roleFilter;
+
+            if (matchesSearch && matchesRole) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>

@@ -1,0 +1,140 @@
+@model IEnumerable<UserManagementApp.Models.UserDocument>
+@{
+    ViewData["Title"] = "Pending Documents";
+}
+
+<div class="advanced-dashboard-container animate-fade-in">
+
+    @if (TempData["Success"] != null)
+    {
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 14px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; margin-bottom: 16px;">
+            <i class="fas fa-check-circle" style="margin-right: 8px;"></i> @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; margin-bottom: 16px;">
+            <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="premium-table-card">
+        <div class="table-utility-bar">
+            <div class="identity-info">
+                <span class="profile-name" style="font-size: 16px;"><i class="fas fa-file-signature" style="color: #6366f1; margin-right: 8px;"></i> KYC Approvals</span>
+                <span class="profile-status-indicator">Pending documents requiring admin review</span>
+            </div>
+            <div class="live-pulse-badge">
+                <span class="pulse-dot"></span> @Model.Count() Pending
+            </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+            <table class="enterprise-matrix">
+                <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th>Username</th>
+                        <th>Uploaded At</th>
+                        <th>Documents</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #6b7280; font-size: 15px;">
+                                <i class="fas fa-check-double" style="font-size: 24px; color: #10b981; margin-bottom: 10px; display: block;"></i>
+                                All caught up! No pending approvals.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var doc in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="identity-cell">
+                                    <div class="avatar-circle avatar-grad-user">
+                                        @(doc.Fullname?.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <div>
+                                        <div class="profile-name text-capitalize">@doc.Fullname</div>
+                                        <div class="profile-status-indicator">
+                                            <span class="dot-user-live" style="background: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.2);"></span>
+                                            Review Required
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="handle-tag handle-user">@@@doc.Username</span></td>
+                            <td style="color: #4b5563; font-weight: 500; font-size: 14px;">@doc.UploadedDate.ToString("dd MMM yyyy, HH:mm")</td>
+                            <td>
+                                <a href="@doc.AadhaarPath" target="_blank" 
+                                   style="display: inline-flex; align-items: center; padding: 6px 12px; background: rgba(99,102,241,0.1); color: #4f46e5; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; margin-right: 8px; transition: all 0.2s;">
+                                    <i class="fas fa-id-card" style="margin-right: 6px;"></i> View Aadhaar
+                                </a>
+                                <a href="@doc.PanPath" target="_blank" 
+                                   style="display: inline-flex; align-items: center; padding: 6px 12px; background: rgba(16,185,129,0.1); color: #059669; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.2s;">
+                                    <i class="fas fa-money-check" style="margin-right: 6px;"></i> View PAN
+                                </a>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 8px; justify-content: center;">
+                                    @if (Context.Session.GetInt32("RoleId") == 3)
+                                    {
+                                        <!-- Approve -->
+                                        <form asp-area="Admin" asp-controller="AdminDoc" asp-action="Approve" method="post" style="margin: 0; padding: 0;">
+                                            <input type="hidden" name="userId" value="@doc.UserId" />
+                                            <button type="submit" 
+                                                    style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: #22c55e; font-size: 14px; cursor: pointer; transition: all 0.2s ease;"
+                                                    title="Approve Documents"
+                                                    onmouseover="this.style.background='rgba(34,197,94,0.2)'; this.style.transform='translateY(-1px)'"
+                                                    onmouseout="this.style.background='rgba(34,197,94,0.1)'; this.style.transform='translateY(0)'"
+                                                    onclick="return confirm('Are you sure you want to approve documents for @doc.Fullname?')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Reject -->
+                                        <form id="rejectForm_@doc.UserId" asp-area="Admin" asp-controller="AdminDoc" asp-action="Reject" method="post" style="margin: 0; padding: 0;">
+                                            <input type="hidden" name="userId" value="@doc.UserId" />
+                                            <input type="hidden" name="reason" id="reason_@doc.UserId" value="" />
+                                            <button type="button" 
+                                                    style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #ef4444; font-size: 14px; cursor: pointer; transition: all 0.2s ease;"
+                                                    title="Reject Documents"
+                                                    onmouseover="this.style.background='rgba(239,68,68,0.2)'; this.style.transform='translateY(-1px)'"
+                                                    onmouseout="this.style.background='rgba(239,68,68,0.1)'; this.style.transform='translateY(0)'"
+                                                    onclick="promptRejection(@doc.UserId, '@doc.Fullname')">
+                                                <i class="fas fa-xmark"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span style="display: inline-flex; align-items: center; padding: 6px 12px; background: rgba(245,158,11,0.1); color: #d97706; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                                            <i class="fas fa-lock" style="margin-right: 6px;"></i> Super Admin Only
+                                        </span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function promptRejection(userId, fullname) {
+        const reason = prompt(`Enter reason for rejecting documents of ${fullname}:`);
+        if (reason && reason.trim() !== "") {
+            document.getElementById('reason_' + userId).value = reason.trim();
+            document.getElementById('rejectForm_' + userId).submit();
+        } else if (reason !== null) {
+            alert("Rejection reason is required.");
+        }
+    }
+</script>

@@ -1,0 +1,142 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Registration Successful";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registration Successful</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #05070f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .rs-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+        }
+        .rs-orb--green {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(16,185,129,0.3) 0%, transparent 70%);
+            top: -10%; left: -5%;
+            animation: rs-float 14s ease-in-out infinite alternate;
+        }
+        .rs-orb--blue {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%);
+            bottom: -10%; right: -5%;
+            animation: rs-float 16s ease-in-out infinite alternate-reverse;
+        }
+        @@keyframes rs-float { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,-20px) scale(1.06)} }
+
+        .rs-card {
+            position: relative;
+            z-index: 10;
+            max-width: 480px;
+            width: 90%;
+            background: rgba(12, 15, 28, 0.85);
+            backdrop-filter: blur(40px) saturate(150%);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 28px;
+            padding: 60px 50px;
+            text-align: center;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+            animation: rs-enter 0.8s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @@keyframes rs-enter {
+            from { opacity:0; transform:translateY(30px) scale(0.97); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+
+        .rs-check-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            box-shadow: 0 10px 40px rgba(16,185,129,0.35);
+            animation: rs-pop 0.6s 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @@keyframes rs-pop {
+            from { opacity:0; transform:scale(0.5); }
+            to { opacity:1; transform:scale(1); }
+        }
+        .rs-check-circle i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .rs-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 10px;
+            animation: rs-fade 0.7s 0.5s both;
+        }
+        .rs-subtitle {
+            font-size: 15px;
+            color: #cbd5e1;
+            margin-bottom: 36px;
+            line-height: 1.6;
+            animation: rs-fade 0.7s 0.6s both;
+        }
+        @@keyframes rs-fade {
+            from { opacity:0; transform:translateY(12px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+
+        .rs-btn {
+            display: inline-block;
+            padding: 15px 50px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(99,102,241,0.25);
+            animation: rs-fade 0.7s 0.7s both;
+        }
+        .rs-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 40px rgba(99,102,241,0.35);
+        }
+    </style>
+</head>
+<body>
+    <div class="rs-orb rs-orb--green"></div>
+    <div class="rs-orb rs-orb--blue"></div>
+
+    <div class="rs-card">
+        <div class="rs-check-circle">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1 class="rs-title">Registration Successful!</h1>
+        <p class="rs-subtitle">
+            Your account has been created successfully.<br>
+            You can now sign in with your credentials.
+        </p>
+        <a href="/Auth/Login" class="rs-btn">Go to Login →</a>
+    </div>
+</body>
+</html>

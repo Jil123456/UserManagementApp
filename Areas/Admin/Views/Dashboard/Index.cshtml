@@ -1,0 +1,165 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="advanced-dashboard-container animate-fade-in">
+
+    @if (ViewBag.Error != null)
+    {
+        <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 20px; border-radius: 12px; font-weight: 600; font-size: 14px; margin-bottom: 16px;">
+            <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> @ViewBag.Error
+        </div>
+    }
+
+    @if (ViewBag.HasUnreadApproval != null && ViewBag.HasUnreadApproval == true)
+    {
+        <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 16px 20px; border-radius: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 15px -3px rgba(16,185,129,0.3);">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    <i class="fas fa-badge-check"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 700;">Documents Approved!</h3>
+                    <p style="margin: 4px 0 0; font-size: 14px; opacity: 0.9;">Great news! Your previously rejected documents have been verified and approved by the admin.</p>
+                </div>
+            </div>
+            <button onclick="this.parentElement.style.display='none'" style="background: rgba(0,0,0,0.1); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.2)'" onmouseout="this.style.background='rgba(0,0,0,0.1)'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    }
+
+    @if (ViewBag.RejectedDocsCount != null && ViewBag.RejectedDocsCount > 0)
+    {
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #b91c1c; padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="font-size: 15px; display: block; margin-bottom: 4px;"><i class="fas fa-file-circle-xmark"></i> Documents Rejected</strong>
+                <span style="font-size: 14px;">One or more of your uploaded documents have been rejected by the admin. Please review them and re-upload valid documents.</span>
+            </div>
+            <a href="/Admin/Dashboard/Appeals" style="padding: 8px 16px; background: #ef4444; color: white; border-radius: 8px; font-weight: 600; font-size: 13px; text-decoration: none; display: inline-block;">
+                <i class="fas fa-comment-dots" style="margin-right: 4px;"></i> Chat with Admin
+            </a>
+        </div>
+    }
+
+    <div class="aesthetic-hero-banner">
+        <div class="hero-text">
+            <h1><i class="fas fa-chart-network text-gradient-sparkle"></i> Central Terminal Control</h1>
+            <p>Welcome back, <span class="text-gradient-sparkle font-bold">@Context.Session.GetString("Username")</span></p>
+        </div>
+        <div class="live-pulse-badge text-white" style="background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);">
+            <span class="pulse-dot"></span> Console Active
+        </div>
+    </div>
+
+    <div class="analytics-strip">
+        <div class="mini-card card-glow-indigo">
+            <div class="card-icon"><i class="fas fa-users"></i></div>
+            <div class="card-info">
+                <span class="card-label">Total Users</span>
+                <span class="card-value">@ViewBag.TotalUsers</span>
+            </div>
+        </div>
+
+        @if (Context.Session.GetInt32("RoleId") == 1 || Context.Session.GetInt32("RoleId") == 3)
+        {
+            <div class="mini-card card-glow-purple">
+                <div class="card-icon"><i class="fas fa-user-shield"></i></div>
+                <div class="card-info">
+                    <span class="card-label">Admins</span>
+                    <span class="card-value">@ViewBag.TotalAdmins</span>
+                </div>
+            </div>
+
+            <div class="mini-card card-glow-green">
+                <div class="card-icon"><i class="fas fa-user-gear"></i></div>
+                <div class="card-info">
+                    <span class="card-label">Standard Users</span>
+                    <span class="card-value">@ViewBag.TotalUsersOnly</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="premium-table-card dashboard-action-panel">
+        <div class="table-utility-bar" style="background: #ffffff;">
+            <div class="identity-info">
+                <span class="profile-name" style="font-size: 15px;"><i class="fas fa-cubes-stacked" style="color: #6366f1; margin-right: 6px;"></i> Quick Navigation Workspace</span>
+                <span class="profile-status-indicator" style="margin-top: 3px;">Select an operational gateway route below to execute actions.</span>
+            </div>
+        </div>
+
+        <div class="dashboard-actions-grid">
+            <a href="/Admin/Dashboard/Profile" class="dashboard-shortcut-card">
+                <div class="shortcut-icon-circle"><i class="fas fa-id-card-clip"></i></div>
+                <div class="shortcut-details">
+                    <h4>View Account Profile</h4>
+                    <p>Inspect active node configurations, clearances, and secure records.</p>
+                </div>
+                <i class="fas fa-chevron-right shortcut-arrow"></i>
+            </a>
+
+            <!-- Upload Documents -->
+            <a href="/Document/Upload" class="dashboard-shortcut-card">
+                <div class="shortcut-icon-circle" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fas fa-cloud-arrow-up"></i></div>
+                <div class="shortcut-details">
+                    <h4>Upload Documents</h4>
+                    <p>Upload your Aadhar Card, PAN Card, Driving License or other documents.</p>
+                </div>
+                <i class="fas fa-chevron-right shortcut-arrow"></i>
+            </a>
+
+            <!-- My Documents -->
+            <a href="/Document/MyDocs" class="dashboard-shortcut-card">
+                <div class="shortcut-icon-circle" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fas fa-file-lines"></i></div>
+                <div class="shortcut-details">
+                    <h4>My Documents</h4>
+                    <p>View status of your uploaded documents — Pending, Approved, or Rejected.</p>
+                </div>
+                <i class="fas fa-chevron-right shortcut-arrow"></i>
+            </a>
+
+            @if (Context.Session.GetInt32("RoleId") == 1 || Context.Session.GetInt32("RoleId") == 3)
+            {
+                <!-- Admin Only: Manage Users -->
+                <a href="/Admin/User" class="dashboard-shortcut-card highlight-shortcut">
+                    <div class="shortcut-icon-circle"><i class="fas fa-users-viewfinder"></i></div>
+                    <div class="shortcut-details">
+                        <h4>Manage Users Matrix</h4>
+                        <p>Access live user registry database terminal to update parameters or drop nodes.</p>
+                    </div>
+                    <i class="fas fa-chevron-right shortcut-arrow"></i>
+                </a>
+
+                @if (Context.Session.GetInt32("RoleId") == 3)
+                {
+
+
+                    <!-- Super Admin Only: Role Master -->
+                    <a href="/Admin/Role" class="dashboard-shortcut-card">
+                        <div class="shortcut-icon-circle" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i class="fas fa-shield-halved"></i></div>
+                        <div class="shortcut-details">
+                            <h4>Role Master</h4>
+                            <p>Add, edit or delete user roles. Manage role assignments across the system.</p>
+                        </div>
+                        <i class="fas fa-chevron-right shortcut-arrow"></i>
+                    </a>
+
+                    <!-- Super Admin Only: Document Management -->
+                    <a href="/Admin/Document" class="dashboard-shortcut-card">
+                        <div class="shortcut-icon-circle" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-folder-open"></i></div>
+                        <div class="shortcut-details">
+                            <h4>Document Management</h4>
+                            <p>Review, approve or reject user-uploaded documents. Download and manage files.</p>
+                        </div>
+                        <i class="fas fa-chevron-right shortcut-arrow"></i>
+                    </a>
+                }
+            }
+        </div>
+    </div>
+
+
+
+</div>
+

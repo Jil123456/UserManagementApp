@@ -1,0 +1,93 @@
+@model UserManagementApp.Models.User
+
+@{
+    ViewData["Title"] = "My Profile";
+    var isSysAdmin = Model.RoleId == 1;
+}
+
+<div class="profile-canvas-blueprint animate-fade-in">
+
+    <div class="vector-glow-accent glow-indigo"></div>
+    <div class="vector-glow-accent glow-pink"></div>
+
+    <div class="premium-profile-card profile-center-chassis">
+        <div class="profile-cover-banner">
+            <div class="cover-glow-accent"></div>
+        </div>
+
+        <div class="profile-card-body">
+
+            <div class="profile-avatar-wrapper">
+                <div class="profile-avatar-main">
+                    @(string.IsNullOrEmpty(Model.Fullname) ? "U" : Model.Fullname.Substring(0, 1).ToUpper())
+                </div>
+            </div>
+
+            <div class="profile-identity-meta">
+                <h2 class="text-capitalize">@Model.Fullname</h2>
+                <div class="meta-badges-strip">
+                    <span class="handle-pill">@@@Model.Username</span>
+                    @if (isSysAdmin)
+                    {
+                        <span class="clearance-pill pill-admin"><i class="fas fa-crown"></i> Root Administrator</span>
+                    }
+                    else
+                    {
+                        <span class="clearance-pill pill-user"><i class="fas fa-user-shield"></i> Verified Operator</span>
+                    }
+                </div>
+            </div>
+
+            <div class="profile-details-matrix">
+
+                <div class="matrix-row">
+                    <div class="row-label-side">
+                        <i class="fas fa-id-badge"></i>
+                        <span>Account Name</span>
+                    </div>
+                    <div class="row-value-side text-capitalize">
+                        @Model.Fullname
+                    </div>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="row-label-side">
+                        <i class="fas fa-at"></i>
+                        <span>System Handle</span>
+                    </div>
+                    <div class="row-value-side font-mono">
+                        @Model.Username
+                    </div>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="row-label-side">
+                        <i class="fas fa-envelope-open-text"></i>
+                        <span>Routing Email</span>
+                    </div>
+                    <div class="row-value-side">
+                        <a href="mailto:@Model.Email" class="profile-link-element">@Model.Email</a>
+                    </div>
+                </div>
+
+                <div class="matrix-row">
+                    <div class="row-label-side">
+                        <i class="fas fa-mobile-screen-button"></i>
+                        <span>Mobile Sync Node</span>
+                    </div>
+                    <div class="row-value-side font-mono">
+                        @Model.Mobile
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="profile-footer-actions">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn-premium-back">
+                    <i class="fas fa-arrow-left-long"></i> Return to Command Center
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

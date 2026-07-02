@@ -1,57 +1,576 @@
-﻿@{
-    ViewData["Title"] = "Login";
+@model UserManagementApp.Models.LoginModel
+
+@{
+    ViewData["Title"] = "Sign In";
 }
 
-<div class="split-auth-container">
-    <div class="form-pane">
-        <h2 class="auth-brand-title" style="margin-bottom: 40px;">Sign in</h2>
+<style>
+    /* ───────── RESET FOR AUTH PAGE ───────── */
+    .lx-auth-viewport *,
+    .lx-auth-viewport *::before,
+    .lx-auth-viewport *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        <form method="post" action="/Auth/Login">
-            @Html.AntiForgeryToken()
+    .lx-auth-viewport {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: #05070f !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        z-index: 999999 !important;
+        overflow: hidden !important;
+        font-family: 'Inter', sans-serif !important;
+    }
 
-            <div class="input-group">
-                <input type="text" name="Username" required placeholder=" " />
-                <label>Username</label>
+    /* ───────── AMBIENT ORBs ───────── */
+    .lx-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(130px);
+        pointer-events: none;
+        will-change: transform;
+    }
+    .lx-orb--indigo {
+        width: 650px; height: 650px;
+        background: radial-gradient(circle, rgba(99,102,241,0.28) 0%, transparent 70%);
+        top: -18%; left: -8%;
+        animation: lx-drift-a 16s ease-in-out infinite alternate;
+    }
+    .lx-orb--rose {
+        width: 550px; height: 550px;
+        background: radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 70%);
+        bottom: -14%; right: -6%;
+        animation: lx-drift-b 18s ease-in-out infinite alternate-reverse;
+    }
+    .lx-orb--cyan {
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 70%);
+        top: 50%; left: 55%;
+        transform: translate(-50%, -50%);
+        animation: lx-drift-c 20s ease-in-out infinite alternate;
+    }
+
+    @@keyframes lx-drift-a { from{transform:translate(0,0) scale(1)} to{transform:translate(40px,-30px) scale(1.08)} }
+    @@keyframes lx-drift-b { from{transform:translate(0,0) scale(1)} to{transform:translate(-35px,25px) scale(1.06)} }
+    @@keyframes lx-drift-c { from{transform:translate(-50%,-50%) scale(1)} to{transform:translate(-45%,-55%) scale(1.1)} }
+
+    /* ───────── NOISE OVERLAY ───────── */
+    .lx-noise {
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    /* ───────── FLOATING PARTICLES ───────── */
+    .lx-particle {
+        position: absolute;
+        width: 3px; height: 3px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.15);
+        pointer-events: none;
+        z-index: 2;
+    }
+    .lx-particle:nth-child(1) { top: 15%; left: 10%; animation: lx-sparkle 6s 0s infinite; }
+    .lx-particle:nth-child(2) { top: 30%; left: 80%; animation: lx-sparkle 8s 1s infinite; width: 4px; height: 4px; }
+    .lx-particle:nth-child(3) { top: 70%; left: 25%; animation: lx-sparkle 7s 2s infinite; }
+    .lx-particle:nth-child(4) { top: 85%; left: 75%; animation: lx-sparkle 5s 0.5s infinite; width: 2px; height: 2px; }
+    .lx-particle:nth-child(5) { top: 50%; left: 50%; animation: lx-sparkle 9s 3s infinite; }
+    .lx-particle:nth-child(6) { top: 20%; left: 60%; animation: lx-sparkle 6s 1.5s infinite; width: 2px; height: 2px; }
+
+    @@keyframes lx-sparkle {
+        0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+        50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+    }
+
+    /* ───────── MAIN CARD ───────── */
+    .lx-card {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        max-width: 920px;
+        width: 92%;
+        min-height: 560px;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow:
+            0 50px 100px rgba(0,0,0,0.45),
+            0 0 0 1px rgba(255,255,255,0.06),
+            inset 0 0 80px rgba(99,102,241,0.03);
+        animation: lx-card-in 1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @@keyframes lx-card-in {
+        from { opacity: 0; transform: translateY(40px) scale(0.96); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ───────── LEFT BRANDING PANE ───────── */
+    .lx-brand {
+        width: 44%;
+        background: linear-gradient(160deg, #1e1b4b 0%, #0f0a2e 40%, #0c0618 100%);
+        padding: 55px 45px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .lx-brand__orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+    }
+    .lx-brand__orb--a {
+        width: 300px; height: 300px;
+        background: rgba(99,102,241,0.25);
+        top: -50px; left: -80px;
+    }
+    .lx-brand__orb--b {
+        width: 250px; height: 250px;
+        background: rgba(168,85,247,0.2);
+        bottom: -40px; right: -60px;
+    }
+
+    .lx-brand__eyebrow {
+        position: relative;
+        font-size: 11px;
+        letter-spacing: 3.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.45);
+        font-weight: 600;
+        margin-bottom: 18px;
+        animation: lx-fade-up 0.6s 0.3s both;
+    }
+    .lx-brand__title {
+        position: relative;
+        font-size: 48px;
+        font-weight: 900;
+        line-height: 1.1;
+        color: #ffffff;
+        margin-bottom: 18px;
+        animation: lx-fade-up 0.6s 0.4s both;
+    }
+    .lx-brand__title span {
+        background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .lx-brand__desc {
+        position: relative;
+        font-size: 14px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.5);
+        max-width: 280px;
+        animation: lx-fade-up 0.6s 0.5s both;
+    }
+    .lx-brand__bar {
+        position: relative;
+        width: 60px;
+        height: 4px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #6366f1, #a855f7);
+        margin-top: 28px;
+        animation: lx-fade-up 0.6s 0.6s both;
+    }
+
+    /* ───────── Floating badge on brand pane ───────── */
+    .lx-brand__badge {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 8px 16px;
+        border-radius: 24px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        font-weight: 500;
+        margin-top: 24px;
+        width: fit-content;
+        animation: lx-fade-up 0.6s 0.7s both;
+    }
+    .lx-brand__badge-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 8px rgba(16,185,129,0.5);
+        animation: lx-pulse-dot 2s infinite;
+    }
+    @@keyframes lx-pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ───────── RIGHT FORM PANE ───────── */
+    .lx-form-pane {
+        width: 56%;
+        background: rgba(10, 12, 22, 0.92);
+        backdrop-filter: blur(50px) saturate(140%);
+        padding: 55px 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .lx-form-icon {
+        width: 52px; height: 52px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15));
+        border: 1px solid rgba(99,102,241,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        animation: lx-fade-up 0.5s 0.3s both;
+    }
+    .lx-form-icon i {
+        font-size: 22px;
+        background: linear-gradient(135deg, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .lx-form-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 6px;
+        animation: lx-fade-up 0.5s 0.35s both;
+    }
+    .lx-form-subtitle {
+        font-size: 14px;
+        color: #94a3b8;
+        margin-bottom: 30px;
+        animation: lx-fade-up 0.5s 0.4s both;
+    }
+
+    /* ───────── INPUT FIELD ───────── */
+    .lx-field {
+        position: relative;
+        margin-bottom: 20px;
+        animation: lx-fade-up 0.5s 0.45s both;
+        width: 100%;
+    }
+    .lx-field__input {
+        width: 100%;
+        padding: 15px 18px 15px 46px;
+        border-radius: 14px;
+        border: 1.5px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.04);
+        color: #e2e8f0;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+    .lx-field__input::placeholder { color: #475569; }
+    .lx-field__input:focus {
+        border-color: rgba(99,102,241,0.5);
+        background: rgba(99,102,241,0.06);
+        box-shadow: 0 0 0 4px rgba(99,102,241,0.08);
+    }
+    .lx-field__icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 15px;
+        color: #475569;
+        transition: color 0.3s ease;
+        pointer-events: none;
+    }
+    .lx-field__input:focus + .lx-field__icon,
+    .lx-field__input:not(:placeholder-shown) + .lx-field__icon {
+        color: #818cf8;
+    }
+
+    /* ───────── REMEMBER ME ───────── */
+    .lx-remember {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        animation: lx-fade-up 0.5s 0.5s both;
+    }
+    .lx-check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+    .lx-check input[type="checkbox"] {
+        width: 16px; height: 16px;
+        accent-color: #6366f1;
+        cursor: pointer;
+    }
+    .lx-check__label {
+        font-size: 13px;
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    /* ───────── MATH CAPTCHA ───────── */
+    .lx-captcha-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: rgba(99,102,241,0.06);
+        border: 1.5px solid rgba(99,102,241,0.15);
+        animation: lx-fade-up 0.5s 0.55s both;
+        width: 100%;
+    }
+    .lx-captcha-icon {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .lx-captcha-icon i {
+        font-size: 16px;
+        color: #fff;
+    }
+    .lx-captcha-question {
+        font-size: 14px;
+        font-weight: 600;
+        color: #c7d2fe;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+    .lx-captcha-question span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.08);
+        border-radius: 8px;
+        padding: 2px 10px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #a5b4fc;
+        margin: 0 2px;
+        min-width: 30px;
+    }
+    .lx-captcha-input {
+        width: 80px;
+        padding: 14px 12px;
+        border-radius: 12px;
+        border: 1.5px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.05);
+        color: #e2e8f0;
+        font-size: 18px;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+        outline: none;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+    .lx-captcha-input:focus {
+        border-color: rgba(99,102,241,0.5);
+        background: rgba(99,102,241,0.08);
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+    .lx-captcha-input::placeholder { color: #475569; font-weight: 500; }
+    .lx-captcha-equals {
+        font-size: 18px;
+        font-weight: 700;
+        color: #64748b;
+        flex-shrink: 0;
+    }
+
+    /* ───────── SUBMIT BUTTON ───────── */
+    .lx-submit {
+        width: 100%;
+        padding: 16px;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+        background-size: 200% 200%;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        box-shadow: 0 8px 30px rgba(99,102,241,0.25);
+        position: relative;
+        overflow: hidden;
+        animation: lx-fade-up 0.5s 0.6s both;
+    }
+    .lx-submit::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        transition: left 0.6s ease;
+    }
+    .lx-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 40px rgba(99,102,241,0.35);
+        background-position: 100% 0;
+    }
+    .lx-submit:hover::before { left: 100%; }
+    .lx-submit:active { transform: translateY(0); }
+
+    /* ───────── OVERRIDE GLOBAL FORM GRID ───────── */
+    .lx-form-pane form {
+        display: block !important;
+        grid-template-columns: none !important;
+    }
+
+    /* ───────── FOOTER ───────── */
+    .lx-footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 13.5px;
+        color: #64748b;
+        animation: lx-fade-up 0.5s 0.65s both;
+    }
+    .lx-footer a {
+        color: #818cf8;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .lx-footer a:hover { color: #a5b4fc; }
+
+    /* ───────── ERROR BANNER ───────── */
+    .lx-error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.2);
+        color: #fca5a5;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13.5px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: lx-fade-up 0.4s both;
+    }
+    .lx-error i { color: #f87171; font-size: 15px; }
+
+    /* ───────── SHARED ANIMATION ───────── */
+    @@keyframes lx-fade-up {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ───────── RESPONSIVE ───────── */
+    @@media (max-width: 768px) {
+        .lx-brand { display: none; }
+        .lx-form-pane { width: 100%; padding: 45px 35px; }
+        .lx-card { max-width: 440px; }
+    }
+</style>
+
+<div class="lx-auth-viewport">
+
+    <!-- Ambient background orbs -->
+    <div class="lx-orb lx-orb--indigo"></div>
+    <div class="lx-orb lx-orb--rose"></div>
+    <div class="lx-orb lx-orb--cyan"></div>
+    <div class="lx-noise"></div>
+
+    <!-- Floating particles -->
+    <div class="lx-particle"></div>
+    <div class="lx-particle"></div>
+    <div class="lx-particle"></div>
+    <div class="lx-particle"></div>
+    <div class="lx-particle"></div>
+    <div class="lx-particle"></div>
+
+    <!-- Main split card -->
+    <div class="lx-card">
+
+        <!-- Left branding pane -->
+        <div class="lx-brand">
+            <div class="lx-brand__orb lx-brand__orb--a"></div>
+            <div class="lx-brand__orb lx-brand__orb--b"></div>
+            <span class="lx-brand__eyebrow">Welcome Back •</span>
+            <h1 class="lx-brand__title">Hello<br><span>Again</span></h1>
+            <p class="lx-brand__desc">Sign in to continue your journey and explore amazing possibilities with your dashboard.</p>
+            <div class="lx-brand__bar"></div>
+            <div class="lx-brand__badge">
+                <div class="lx-brand__badge-dot"></div>
+                <span>Secure • Encrypted • Protected</span>
+            </div>
+        </div>
+
+        <!-- Right form pane -->
+        <div class="lx-form-pane">
+
+            <div class="lx-form-icon">
+                <i class="fas fa-shield-halved"></i>
             </div>
 
-            <div class="input-group">
-                <input type="password" name="Password" required placeholder=" " />
-                <label>Password</label>
-            </div>
+            <h2 class="lx-form-title">Sign In</h2>
+            <p class="lx-form-subtitle">Enter your credentials to access your account</p>
 
-            <button type="submit" class="btn-gradient-submit" style="margin-top: 15px;">SIGN IN</button>
-        </form>
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; margin-bottom: 24px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <i class="fas fa-check-circle" style="margin-right: 6px;"></i> @TempData["SuccessMessage"]
+                </div>
+            }
 
-        @if (ViewBag.Error != null)
-        {
-            <div class="error-msg-box">@ViewBag.Error</div>
-        }
+            @if (ViewBag.Error != null)
+            {
+                <div class="lx-error"><i class="fas fa-circle-exclamation"></i> @ViewBag.Error</div>
+            }
 
-        <div class="switch-link" style="text-align: center; margin-top: 25px; font-size: 13.5px; color: #718096;">
-            Don't have an account? <a href="/Auth/Register" style="color: #4f46e5; font-weight: 600; text-decoration: none;">Create an account</a>
+            <form method="post" action="/Auth/Login">
+                @Html.AntiForgeryToken()
+
+                <div class="lx-field">
+                    <input type="text" name="Username" required placeholder="Username" autocomplete="off" class="lx-field__input" />
+                    <i class="fas fa-user lx-field__icon"></i>
+                </div>
+
+                <div class="lx-field">
+                    <input type="password" name="Password" required placeholder="Password" class="lx-field__input" />
+                    <i class="fas fa-lock lx-field__icon"></i>
+                </div>
+
+                <div class="lx-remember">
+                    <label class="lx-check">
+                        <input type="checkbox" name="RememberMe" />
+                        <span class="lx-check__label">Remember me</span>
+                    </label>
+                </div>
+
+                <!-- Math Captcha -->
+                <div class="lx-captcha-box">
+                    <div class="lx-captcha-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="lx-captcha-question">
+                        <span>@ViewBag.CaptchaNum1</span> + <span>@ViewBag.CaptchaNum2</span>
+                    </div>
+                    <span class="lx-captcha-equals">=</span>
+                    <input type="number" name="CaptchaAnswer" required class="lx-captcha-input" placeholder="?" autocomplete="off" />
+                </div>
+
+                <button type="submit" class="lx-submit">
+                    <i class="fas fa-arrow-right-to-bracket" style="margin-right: 8px;"></i> Sign In
+                </button>
+
+                <div class="lx-footer">
+                    <span>Don't have an account? <a href="/Auth/Register">Sign Up</a></span>
+                </div>
+            </form>
+
         </div>
-    </div>
 
-    <div class="banner-pane" style="width: 50% !important; height: 100%; position: relative; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; text-align: center !important; padding: 0 40px !important; overflow: hidden;">
-
-        <div class="liquid-blob blob-1"></div>
-        <div class="liquid-blob blob-2"></div>
-        <div class="liquid-blob blob-3"></div>
-
-        <div style="position: relative; z-index: 5; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-align: center !important; width: 100%;">
-
-            <h2 style="font-size: 34px !important; font-weight: 800 !important; color: #ffffff !important; margin-bottom: 12px !important; text-align: center !important; letter-spacing: -0.5px !important; -webkit-text-fill-color: #ffffff !important; background: none !important; border: none !important;">
-                Welcome Back!
-            </h2>
-
-            <p style="font-size: 14px !important; color: rgba(255, 255, 255, 0.95) !important; line-height: 1.6 !important; margin-bottom: 35px !important; text-align: center !important; padding: 0 10px !important;">
-                Enter personal details to your employee account
-            </p>
-
-            <a href="/Auth/Register" style="padding: 12px 45px !important; border: 2px solid #ffffff !important; border-radius: 25px !important; background: #ffffff !important; color: #4f46e5 !important; font-weight: 700 !important; font-size: 13px !important; letter-spacing: 1px !important; text-decoration: none !important; display: inline-block !important; transition: all 0.2s ease-in-out !important; box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;">
-                SIGN UP
-            </a>
-
-        </div>
     </div>
 </div>
